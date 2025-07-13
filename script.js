@@ -1,5 +1,7 @@
+// File: script.js (Final untuk backend Netlify)
+
 // --- KONFIGURASI ---
-// Alamat backend di Netlify. JANGAN DIUBAH.
+// Alamat backend di Netlify. INI SUDAH BENAR dan tidak perlu diubah lagi.
 const webAppUrl = '/.netlify/functions/api';
 // --------------------
 
@@ -66,7 +68,7 @@ async function initLihatWpPage() {
         dataWajibPajakGlobal = data.wajibPajak || [];
         dataWilayahGlobal = data.wilayah || [];
         populateDataTable(dataWajibPajakGlobal);
-        setupModal();
+        setupWpEditModal();
         
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
@@ -132,6 +134,7 @@ async function initDetailPage() {
         displayPhotos(item);
         const riwayatKetetapan = dataKetetapanGlobal.filter(k => k.NPWPD == npwpd);
         displayKetetapanHistory(riwayatKetetapan);
+        setupKetetapanEditModal();
     } catch (error) {
         detailContent.innerHTML = `<p style="color: red;">${error.message}</p>`;
     }
@@ -260,11 +263,41 @@ async function handleDeleteKetetapanClick(idKetetapan) {
     }
 }
 
+async function handleEditKetetapanClick(idKetetapan) {
+    const dataToEdit = dataKetetapanGlobal.find(item => item.ID_Ketetapan == idKetetapan);
+    if (!dataToEdit) { alert('Data ketetapan tidak ditemukan!'); return; }
+    document.getElementById('editKetetapanId').value = dataToEdit.ID_Ketetapan;
+    document.getElementById('editKetetapanMasaPajak').value = dataToEdit.MasaPajak;
+    document.getElementById('editKetetapanJumlahPokok').value = dataToEdit.JumlahPokok;
+    document.getElementById('editKetetapanCatatan').value = dataToEdit.Catatan;
+    document.getElementById('editKetetapanModal').style.display = 'block';
+}
+
+async function handleUpdateKetetapanSubmit(event) {
+    event.preventDefault();
+    const updateButton = document.getElementById('updateKetetapanButton');
+    updateButton.disabled = true; updateButton.textContent = 'Menyimpan...';
+    try {
+        const updatedData = {
+            action: 'updateKetetapan', id_ketetapan: document.getElementById('editKetetapanId').value,
+            masaPajak: document.getElementById('editKetetapanMasaPajak').value,
+            jumlahPokok: document.getElementById('editKetetapanJumlahPokok').value,
+            catatan: document.getElementById('editKetetapanCatatan').value
+        };
+        const result = await postData(updatedData);
+        alert(result.message || 'Ketetapan berhasil diperbarui!');
+        document.getElementById('editKetetapanModal').style.display = 'none';
+        location.reload();
+    } catch (error) {
+        alert('Gagal memperbarui ketetapan: ' + error.message);
+    } finally {
+        updateButton.disabled = false; updateButton.textContent = 'Simpan Perubahan';
+    }
+}
 
 // =================================================================
 // Fungsi-fungsi Pembantu (Helpers)
 // =================================================================
-
 function showStatus(message, isSuccess, elementId = 'status') {
     const statusDiv = document.getElementById(elementId);
     if (!statusDiv) return;
@@ -286,14 +319,24 @@ async function postData(data) {
     return result;
 }
 
-function setupModal() {
+function setupWpEditModal() {
     const modal = document.getElementById('editModal');
     if (!modal) return;
     const closeBtn = modal.querySelector('.close-button');
     const editForm = document.getElementById('editForm');
     closeBtn.onclick = () => { modal.style.display = 'none'; };
-    window.onclick = (event) => { if (event.target == modal) modal.style.display = 'none'; };
-    editForm.addEventListener('submit', handleUpdateFormSubmit);
+    window.addEventListener('click', (event) => { if (event.target == modal) modal.style.display = 'none'; });
+    editForm.addEventListener('submit', handleUpdateWpFormSubmit);
+}
+
+function setupKetetapanEditModal() {
+    const modal = document.getElementById('editKetetapanModal');
+    if (!modal) return;
+    const closeBtn = modal.querySelector('#closeKetetapanModal');
+    const editForm = document.getElementById('editKetetapanForm');
+    closeBtn.onclick = () => { modal.style.display = 'none'; };
+    window.addEventListener('click', (event) => { if (event.target == modal) modal.style.display = 'none'; });
+    editForm.addEventListener('submit', handleUpdateKetetapanSubmit);
 }
 
 async function fetchAllData() {
@@ -334,7 +377,7 @@ function populateDataTable(wajibPajakData) {
             });
             const npwpd = rowData['NPWPD'];
             const aksiCell = document.createElement('td');
-            aksiCell.innerHTML = `<button class="btn-aksi btn-edit" onclick="handleEditClick('${npwpd}')">Edit</button> <button class="btn-aksi btn-hapus" onclick="handleDeleteClick('${npwpd}')">Hapus</button>`;
+            aksiCell.innerHTML = `<button class="btn-aksi btn-edit" onclick="handleEditWpClick('${npwpd}')">Edit</button> <button class="btn-aksi btn-hapus" onclick="handleDeleteClick('${npwpd}')">Hapus</button>`;
             row.appendChild(aksiCell);
             tableBody.appendChild(row);
         });
@@ -382,7 +425,10 @@ function displayKetetapanHistory(riwayatData) {
             });
             const idKetetapan = rowData['ID_Ketetapan'];
             const aksiCell = document.createElement('td');
-            aksiCell.innerHTML = `<button class="btn-aksi btn-hapus" onclick="handleDeleteKetetapanClick('${idKetetapan}')">Hapus</button>`;
+            aksiCell.innerHTML = `
+                <button class="btn-aksi btn-edit" onclick="handleEditKetetapanClick('${idKetetapan}')">Edit</button>
+                <button class="btn-aksi btn-hapus" onclick="handleDeleteKetetapanClick('${idKetetapan}')">Hapus</button>
+            `;
             row.appendChild(aksiCell);
             tableBody.appendChild(row);
         });
