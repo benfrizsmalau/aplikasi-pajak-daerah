@@ -1,7 +1,8 @@
-// File: netlify/functions/api.js
+// File: netlify/functions/api.js (Versi Final dan Lengkap)
 const { google } = require('googleapis');
 
-const SPREADSHEET_ID = '1HGO9-MsOyezFU3B8opAc8GeCsLshKNSSWyb3cEBxCoY'; // <-- GANTI DENGAN ID ANDA
+// Ganti dengan ID Google Sheet Anda
+const SPREADSHEET_ID = '1HGO9-MsOyezFU3B8opAc8GeCsLshKNSSWyb3cEBxCoY';
 
 // Fungsi otentikasi
 async function getAuthClient() {
@@ -27,7 +28,7 @@ function formatSheetData(values) {
 }
 
 // Handler utama Netlify Function
-exports.handler = async (event, context) => {
+exports.handler = async (event) => {
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
@@ -43,6 +44,7 @@ exports.handler = async (event, context) => {
         const sheets = google.sheets({ version: 'v4', auth });
         let responseData;
 
+        // Menangani GET request untuk membaca semua data
         if (event.httpMethod === 'GET') {
             const ranges = ["datawp", "Wilayah", "MasterPajakRetribusi", "KetetapanPajak"];
             const response = await sheets.spreadsheets.values.batchGet({
