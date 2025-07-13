@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Data - Aplikasi Pajak Daerah</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="page-tambah-wp">
+
+    <header class="main-header">
+        <h1>Aplikasi Pajak Daerah</h1>
+        <nav>
+            <a href="index.html">Dasbor</a>
+            <a href="tambah-data.html" class="active">Tambah Data WP</a>
+            <a href="lihat-data.html">Lihat Data WP</a>
+            <a href="tambah-ketetapan.html">Buat Ketetapan</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>📝 Formulir Pendataan Wajib Pajak</h2>
+        <form id="pajakForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="npwpd">NPWPD</label>
+                    <input type="text" id="npwpd" required>
+                </div>
+                <div class="form-group">
+                    <label for="namaUsaha">Nama Usaha</label>
+                    <input type="text" id="namaUsaha" required>
+                </div>
+                <div class="form-group">
+                    <label for="namaPemilik">Nama Pemilik</label>
+                    <input type="text" id="namaPemilik" required>
+                </div>
+                <div class="form-group">
+                    <label for="nikKtp">NIK KTP</label>
+                    <input type="text" id="nikKtp" required>
+                </div>
+                <div class="form-group full-width">
+                    <label for="alamat">Alamat</label>
+                    <input type="text" id="alamat" required>
+                </div>
+                <div class="form-group">
+                    <label for="telephone">Telephone</label>
+                    <input type="text" id="telephone" required>
+                </div>
+                <div class="form-group">
+                    <label for="kelurahan">Kelurahan</label>
+                    <select id="kelurahan" required>
+                        <option value="">-- Memuat Wilayah --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="kecamatan">Kecamatan</label>
+                    <input type="text" id="kecamatan" disabled required>
+                </div>
+                <div class="form-group">
+                    <label for="fotoPemilik">Foto Pemilik</label>
+                    <input type="file" id="fotoPemilik" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label for="fotoTempatUsaha">Foto Tempat Usaha</label>
+                    <input type="file" id="fotoTempatUsaha" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label for="fotoKtp">Foto KTP</label>
+                    <input type="file" id="fotoKtp" accept="image/*">
+                </div>
+            </div>
+            <button type="submit" id="submitButton">Kirim Data</button>
+            <div id="status"></div>
+        </form>
+    </main>
+    
+    <script src="script.js"></script>
+</body>
+</html>
