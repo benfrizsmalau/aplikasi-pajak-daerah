@@ -1,7 +1,7 @@
 // File: script.js (Final untuk backend Netlify)
 
 // --- KONFIGURASI ---
-// Alamat backend di Netlify. INI SUDAH BENAR dan tidak perlu diubah lagi.
+// Alamat backend di Netlify. Ini sudah benar dan tidak perlu diubah lagi.
 const webAppUrl = '/.netlify/functions/api';
 // --------------------
 
@@ -205,7 +205,7 @@ function handleEditClick(npwpd) {
     document.getElementById('editModal').style.display = 'block';
 }
 
-async function handleUpdateFormSubmit(event) {
+async function handleUpdateWpFormSubmit(event) {
     event.preventDefault();
     const updateButton = document.getElementById('updateButton');
     updateButton.disabled = true; updateButton.textContent = 'Menyimpan...';
@@ -289,11 +289,12 @@ async function handleUpdateKetetapanSubmit(event) {
         document.getElementById('editKetetapanModal').style.display = 'none';
         location.reload();
     } catch (error) {
-        alert('Gagal memperbarui ketetapan: ' + error.message);
+        alert('Gagal memperbarui data: ' + error.message);
     } finally {
         updateButton.disabled = false; updateButton.textContent = 'Simpan Perubahan';
     }
 }
+
 
 // =================================================================
 // Fungsi-fungsi Pembantu (Helpers)
