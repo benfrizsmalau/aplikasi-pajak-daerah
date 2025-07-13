@@ -1,7 +1,7 @@
 // File: netlify/functions/api.js
 const { google } = require('googleapis');
 
-const SPREADSHEET_ID = '1x3EmFN0kM7x9Th0ZxsHEWX7hFNU6Vum8'; // <-- GANTI DENGAN ID ANDA
+const SPREADSHEET_ID = '1HGO9-MsOyezFU3B8opAc8GeCsLshKNSSWyb3cEBxCoY'; // <-- GANTI DENGAN ID ANDA
 
 // Fungsi otentikasi
 async function getAuthClient() {
