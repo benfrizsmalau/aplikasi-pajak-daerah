@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Ketetapan - Aplikasi Pajak Daerah</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="page-tambah-ketetapan">
+
+    <header class="main-header">
+        <h1>Aplikasi Pajak Daerah</h1>
+        <nav>
+            <a href="index.html">Dasbor</a>
+            <a href="tambah-data.html">Tambah Data WP</a>
+            <a href="lihat-data.html">Lihat Data WP</a>
+            <a href="tambah-ketetapan.html" class="active">Buat Ketetapan</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>➕ Buat Ketetapan Pajak/Retribusi Baru</h2>
+        <form id="ketetapanForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="ketetapanNpwpd">NPWPD</label>
+                    <input type="text" id="ketetapanNpwpd" required placeholder="Masukkan NPWPD">
+                </div>
+                <div class="form-group">
+                    <label for="ketetapanLayanan">Jenis Pajak/Retribusi</label>
+                    <select id="ketetapanLayanan" required>
+                        <option value="">-- Memuat Layanan --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ketetapanMasaPajak">Masa Pajak</label>
+                    <input type="text" id="ketetapanMasaPajak" required placeholder="Contoh: Juli 2025">
+                </div>
+                <div class="form-group">
+                    <label for="ketetapanJumlahPokok">Jumlah Pokok (Rp)</label>
+                    <input type="number" id="ketetapanJumlahPokok" required placeholder="Hanya angka">
+                </div>
+                <div class="form-group full-width">
+                    <label for="tglTunggakan">Tanggal Mulai Tunggakan (Opsional)</label>
+                    <input type="date" id="tglTunggakan">
+                    <small>Isi hanya jika ada tunggakan dari masa lalu.</small>
+                </div>
+                 <div class="form-group full-width">
+                    <label for="catatan">Catatan (Opsional)</label>
+                    <input type="text" id="catatan" placeholder="Keterangan tambahan...">
+                </div>
+            </div>
+            <button type="submit" id="submitKetetapanButton">Buat Ketetapan</button>
+            <div id="status"></div>
+        </form>
+    </main>
+    
+    <script src="script.js"></script>
+</body>
+</html>
