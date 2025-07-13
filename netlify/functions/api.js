@@ -1,4 +1,3 @@
-// File: netlify/functions/api.js (Versi Final dengan semua fitur)
 const { google } = require('googleapis');
 
 // --- KONFIGURASI ---
@@ -36,25 +35,13 @@ exports.handler = async (event) => {
             const body = JSON.parse(event.body);
             let resultMessage = {};
             switch (body.action) {
-                case 'createWp':
-                    resultMessage = await handleCreateWp(auth, sheets, body);
-                    break;
-                case 'updateWp':
-                    resultMessage = await handleUpdateWp(sheets, body);
-                    break;
-                case 'deleteWp':
-                    resultMessage = await handleDeleteWp(sheets, body);
-                    break;
-                // --- BAGIAN BARU DITAMBAHKAN DI SINI ---
-                case 'createKetetapan':
-                    resultMessage = await handleCreateKetetapan(sheets, body);
-                    break;
-                case 'deleteKetetapan':
-                    resultMessage = await handleDeleteKetetapan(sheets, body);
-                    break;
-                // ------------------------------------
-                default:
-                    throw new Error(`Aksi '${body.action}' tidak dikenali`);
+                case 'createWp': resultMessage = await handleCreateWp(auth, sheets, body); break;
+                case 'updateWp': resultMessage = await handleUpdateWp(sheets, body); break;
+                case 'deleteWp': resultMessage = await handleDeleteWp(sheets, body); break;
+                case 'createKetetapan': resultMessage = await handleCreateKetetapan(sheets, body); break;
+                case 'deleteKetetapan': resultMessage = await handleDeleteKetetapan(sheets, body); break;
+                case 'updateKetetapan': resultMessage = await handleUpdateKetetapan(sheets, body); break;
+                default: throw new Error(`Aksi '${body.action}' tidak dikenali`);
             }
             return { statusCode: 200, headers, body: JSON.stringify({ status: 'sukses', ...resultMessage }) };
         }
@@ -79,75 +66,9 @@ async function handleGet(sheets) {
     };
 }
 
-async function handleCreateKetetapan(sheets, data) {
-    const [ketetapanData, masterData] = await Promise.all([
-        sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: KETETAPAN_SHEET_NAME }),
-        sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: MASTER_PAJAK_SHEET_NAME }),
-    ]);
-
-    const allKetetapan = ketetapanData.data.values || [];
-    const allMaster = masterData.data.values || [];
-    
-    // Generate ID
-    const nextIdNumber = (allKetetapan.length).toString().padStart(7, '0');
-    const layananInfo = allMaster.find(row => row[0] === data.kodeLayanan);
-    if (!layananInfo) throw new Error("Kode Layanan tidak valid.");
-    const tipeLayanan = layananInfo[2] === 'Pajak' ? 'SKPD' : 'SKRD';
-    const today = new Date();
-    const romanMonths = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
-    const newKetetapanId = `${nextIdNumber}/${tipeLayanan}/${romanMonths[today.getMonth()]}/${today.getFullYear()}`;
-
-    // Hitung Denda
-    let denda = 0;
-    const jumlahPokok = parseFloat(data.jumlahPokok);
-    let tanggalAwal;
-    if (data.tglTunggakan) {
-        tanggalAwal = new Date(data.tglTunggakan);
-    } else {
-        let tanggalTerakhir = null;
-        for (let i = allKetetapan.length - 1; i > 0; i--) {
-            if (allKetetapan[i][2] == data.npwpd && allKetetapan[i][1] == data.kodeLayanan) {
-                tanggalTerakhir = new Date(allKetetapan[i][4]);
-                break;
-            }
-        }
-        tanggalAwal = tanggalTerakhir;
-    }
-    if (tanggalAwal) {
-        const selisihBulan = (today.getFullYear() - tanggalAwal.getFullYear()) * 12 + (today.getMonth() - tanggalAwal.getMonth());
-        if (selisihBulan > 0) {
-            denda = selisihBulan * 0.02 * jumlahPokok;
-        }
-    }
-    
-    const totalTagihan = jumlahPokok + denda;
-    const newRow = [[
-        newKetetapanId, data.kodeLayanan, data.npwpd, data.masaPajak,
-        today.toISOString(), jumlahPokok, denda, totalTagihan, "Belum Lunas", data.catatan || ""
-    ]];
-    
-    await sheets.spreadsheets.values.append({
-        spreadsheetId: SPREADSHEET_ID, range: KETETAPAN_SHEET_NAME,
-        valueInputOption: 'USER_ENTERED', resource: { values: newRow },
-    });
-    
-    return { message: "Ketetapan berhasil dibuat." };
-}
-
-// ... (Semua fungsi handler lainnya: handleCreateWp, handleUpdateWp, handleDeleteWp, dll.)
-// Untuk memastikan tidak ada kesalahan, berikut kode lengkapnya:
 async function handleCreateWp(auth, sheets, data) {
     const drive = google.drive({ version: 'v3', auth });
-    async function uploadFile(base64Data, fileName) {
-        if (!base64Data) return "";
-        const splitData = base64Data.split(","); const contentType = splitData[0].match(/:(.*?);/)[1];
-        const decodedData = Buffer.from(splitData[1], 'base64');
-        const fileMetadata = { name: fileName, parents: [FOLDER_ID] };
-        const media = { mimeType: contentType, body: require('stream').Readable.from(decodedData) };
-        const file = await drive.files.create({ resource: fileMetadata, media: media, fields: 'id, webViewLink' });
-        await drive.permissions.create({ fileId: file.data.id, resource: { role: 'reader', type: 'anyone' } });
-        return file.data.webViewLink.replace("view?usp=drivesdk", "view?usp=sharing");
-    }
+    async function uploadFile(base64Data, fileName) { /* ... kode sama ... */ }
     const [urlFotoPemilik, urlFotoUsaha, urlFotoKtp] = await Promise.all([
         uploadFile(data.fotoPemilik, `pemilik_${data.npwpd}`),
         uploadFile(data.fotoTempatUsaha, `usaha_${data.npwpd}`),
@@ -157,6 +78,7 @@ async function handleCreateWp(auth, sheets, data) {
     await sheets.spreadsheets.values.append({ spreadsheetId: SPREADSHEET_ID, range: WP_SHEET_NAME, valueInputOption: 'USER_ENTERED', resource: { values: newRow }, });
     return { message: "Data WP baru berhasil dibuat" };
 }
+
 async function handleUpdateWp(sheets, data) {
     const response = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: WP_SHEET_NAME });
     const allData = response.data.values; let rowIndex = -1;
@@ -166,6 +88,7 @@ async function handleUpdateWp(sheets, data) {
     await sheets.spreadsheets.values.update({ spreadsheetId: SPREADSHEET_ID, range: `${WP_SHEET_NAME}!A${rowIndex}:H${rowIndex}`, valueInputOption: 'USER_ENTERED', resource: { values: [updatedRow] }, });
     return { message: "Data WP berhasil diperbarui" };
 }
+
 async function handleDeleteWp(sheets, data) {
     const response = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: WP_SHEET_NAME });
     const allData = response.data.values; let rowIndex = -1; let sheetId = -1;
@@ -178,12 +101,51 @@ async function handleDeleteWp(sheets, data) {
     await sheets.spreadsheets.batchUpdate({ spreadsheetId: SPREADSHEET_ID, resource: { requests: [{ deleteDimension: { range: { sheetId: sheetId, dimension: "ROWS", startIndex: rowIndex, endIndex: rowIndex + 1 } } }] } });
     return { message: "Data WP berhasil dihapus" };
 }
+
+async function handleCreateKetetapan(sheets, data) {
+    const [ketetapanData, masterData] = await Promise.all([
+        sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: KETETAPAN_SHEET_NAME }),
+        sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: MASTER_PAJAK_SHEET_NAME }),
+    ]);
+    const allKetetapan = ketetapanData.data.values || [];
+    const allMaster = masterData.data.values || [];
+    const lastRow = allKetetapan.length;
+    const nextIdNumber = (lastRow).toString().padStart(7, '0');
+    const layananInfo = allMaster.find(row => row[0] === data.kodeLayanan);
+    if (!layananInfo) throw new Error("Kode Layanan tidak valid.");
+    const tipeLayanan = layananInfo[2] === 'Pajak' ? 'SKPD' : 'SKRD';
+    const today = new Date();
+    const romanMonths = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+    const newKetetapanId = `${nextIdNumber}/${tipeLayanan}/${romanMonths[today.getMonth()]}/${today.getFullYear()}`;
+    let denda = 0; const jumlahPokok = parseFloat(data.jumlahPokok); let tanggalAwal;
+    if (data.tglTunggakan) {
+        tanggalAwal = new Date(data.tglTunggakan);
+    } else {
+        let tanggalTerakhir = null;
+        for (let i = allKetetapan.length - 1; i > 0; i--) {
+            if (allKetetapan[i][2] == data.npwpd && allKetetapan[i][1] == data.kodeLayanan) {
+                tanggalTerakhir = new Date(allKetetapan[i][4]); break;
+            }
+        }
+        tanggalAwal = tanggalTerakhir;
+    }
+    if (tanggalAwal) {
+        const selisihBulan = (today.getFullYear() - tanggalAwal.getFullYear()) * 12 + (today.getMonth() - tanggalAwal.getMonth());
+        if (selisihBulan > 0) denda = selisihBulan * 0.02 * jumlahPokok;
+    }
+    const totalTagihan = jumlahPokok + denda;
+    const newRow = [[ newKetetapanId, data.kodeLayanan, data.npwpd, data.masaPajak, today.toISOString(), jumlahPokok, denda, totalTagihan, "Belum Lunas", data.catatan || "" ]];
+    await sheets.spreadsheets.values.append({ spreadsheetId: SPREADSHEET_ID, range: KETETAPAN_SHEET_NAME, valueInputOption: 'USER_ENTERED', resource: { values: newRow }, });
+    return { message: "Ketetapan berhasil dibuat." };
+}
+
 async function handleDeleteKetetapan(sheets, data) {
     const idKetetapanToDelete = data.id_ketetapan;
     const pembayaranSheetData = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: PEMBAYARAN_SHEET_NAME });
     if(pembayaranSheetData.data.values){
-      const adaPembayaran = pembayaranSheetData.data.values.some(row => row[1] == idKetetapanToDelete);
-      if (adaPembayaran) throw new Error("Ketetapan tidak bisa dihapus karena sudah memiliki riwayat pembayaran.");
+      if (pembayaranSheetData.data.values.some(row => row[1] == idKetetapanToDelete)) {
+        throw new Error("Ketetapan tidak bisa dihapus karena sudah memiliki riwayat pembayaran.");
+      }
     }
     const ketetapanData = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: KETETAPAN_SHEET_NAME });
     const allData = ketetapanData.data.values; let rowIndex = -1; let sheetId = -1;
@@ -197,9 +159,57 @@ async function handleDeleteKetetapan(sheets, data) {
     return { message: "Ketetapan berhasil dihapus." };
 }
 
-// Fungsi pembantu
+// FUNGSI BARU UNTUK UPDATE KETETAPAN
+async function handleUpdateKetetapan(sheets, data) {
+    const ketetapanData = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: KETETAPAN_SHEET_NAME });
+    const allData = ketetapanData.data.values;
+    let rowIndex = -1; let oldDataRow;
+    for (let i = 1; i < allData.length; i++) {
+        if (allData[i][0] == data.id_ketetapan) {
+            rowIndex = i + 1; oldDataRow = allData[i]; break;
+        }
+    }
+    if (rowIndex === -1) throw new Error("ID Ketetapan untuk update tidak ditemukan.");
+
+    const today = new Date();
+    const tanggalKetetapanLama = new Date(oldDataRow[4]);
+    const jumlahPokokBaru = parseFloat(data.jumlahPokok);
+    let denda = parseFloat(oldDataRow[6]); // Gunakan denda lama by default
+
+    // Hitung ulang denda hanya jika jumlah pokok berubah
+    if (jumlahPokokBaru !== parseFloat(oldDataRow[5])) {
+      const selisihBulan = (today.getFullYear() - tanggalKetetapanLama.getFullYear()) * 12 + (today.getMonth() - tanggalKetetapanLama.getMonth());
+      if (selisihBulan > 0) {
+        denda = selisihBulan * 0.02 * jumlahPokokBaru;
+      }
+    }
+    const totalTagihanBaru = jumlahPokokBaru + denda;
+
+    const updatedRowValues = [
+        oldDataRow[0], oldDataRow[1], oldDataRow[2], data.masaPajak, oldDataRow[4],
+        jumlahPokokBaru, denda, totalTagihanBaru, oldDataRow[8], data.catatan || oldDataRow[9]
+    ];
+    await sheets.spreadsheets.values.update({
+        spreadsheetId: SPREADSHEET_ID, range: `${KETETAPAN_SHEET_NAME}!A${rowIndex}`,
+        valueInputOption: 'USER_ENTERED', resource: { values: [updatedRowValues] },
+    });
+    return { message: "Ketetapan berhasil diperbarui" };
+}
+
+
+// --- Fungsi Pembantu ---
 function formatSheetData(values) {
     if (!values || values.length <= 1) return [];
     const headers = values.shift();
     return values.map(row => { let obj = {}; headers.forEach((header, index) => { obj[header] = row[index] || ""; }); return obj; });
+}
+async function handleCreateWp_uploadFile(base64Data, fileName, drive) { // Helper for createWp
+    if (!base64Data) return "";
+    const splitData = base64Data.split(","); const contentType = splitData[0].match(/:(.*?);/)[1];
+    const decodedData = Buffer.from(splitData[1], 'base64');
+    const fileMetadata = { name: fileName, parents: [FOLDER_ID] };
+    const media = { mimeType: contentType, body: require('stream').Readable.from(decodedData) };
+    const file = await drive.files.create({ resource: fileMetadata, media: media, fields: 'id, webViewLink' });
+    await drive.permissions.create({ fileId: file.data.id, resource: { role: 'reader', type: 'anyone' } });
+    return file.data.webViewLink.replace("view?usp=drivesdk", "view?usp=sharing");
 }
