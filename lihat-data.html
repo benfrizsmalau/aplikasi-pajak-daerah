@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lihat Data - Aplikasi Pajak Daerah</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="page-lihat-wp">
+
+    <header class="main-header">
+        <h1>Aplikasi Pajak Daerah</h1>
+        <nav>
+            <a href="index.html">Dasbor</a>
+            <a href="tambah-data.html">Tambah Data WP</a>
+            <a href="lihat-data.html" class="active">Lihat Data WP</a>
+            <a href="tambah-ketetapan.html">Buat Ketetapan</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>📊 Data Wajib Pajak Terdaftar</h2>
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label for="searchInput">Cari berdasarkan NPWPD atau Nama Usaha:</label>
+            <input type="text" id="searchInput" placeholder="Ketik untuk mencari...">
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table id="dataTable">
+                <thead>
+                    </thead>
+                <tbody>
+                    <tr><td colspan="12">Memuat data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>✏️ Edit Data Wajib Pajak</h2>
+            <form id="editForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editNpwd">NPWPD</label>
+                        <input type="text" id="editNpwd" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="editNamaUsaha">Nama Usaha</label>
+                        <input type="text" id="editNamaUsaha" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editNamaPemilik">Nama Pemilik</label>
+                        <input type="text" id="editNamaPemilik" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editNikKtp">NIK KTP</label>
+                        <input type="text" id="editNikKtp" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="editAlamat">Alamat</label>
+                        <input type="text" id="editAlamat" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTelephone">Telephone</label>
+                        <input type="text" id="editTelephone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editKelurahan">Kelurahan</label>
+                        <select id="editKelurahan" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editKecamatan">Kecamatan</label>
+                        <input type="text" id="editKecamatan" disabled required>
+                    </div>
+                </div>
+                <p style="font-size: 0.9em; color: #666; margin-top: 1rem;">* Fitur edit foto tidak tersedia saat ini.</p>
+                <button type="submit" id="updateButton">Simpan Perubahan</button>
+                <div id="editStatus"></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
