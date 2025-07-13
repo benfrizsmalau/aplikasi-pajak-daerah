@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Wajib Pajak - Aplikasi Pajak Daerah</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="page-detail-wp">
+
+    <header class="main-header">
+        <h1>Aplikasi Pajak Daerah</h1>
+        <nav>
+            <a href="index.html">Dasbor</a>
+            <a href="tambah-data.html">Tambah Data WP</a>
+            <a href="lihat-data.html">Lihat Data WP</a>
+            <a href="tambah-ketetapan.html">Buat Ketetapan</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="detail-header">
+            <h2>📄 Detail Wajib Pajak</h2>
+            <div id="detailAksi">
+                </div>
+        </div>
+        
+        <div id="detailContent" class="detail-card">
+            <p>Memuat data...</p>
+        </div>
+        
+        <h3 style="margin-top: 2rem;">Galeri Foto</h3>
+        <div id="fotoContent" class="foto-grid">
+            </div>
+
+        <h3 style="margin-top: 2rem;">Riwayat Ketetapan Pajak</h3>
+        <div style="overflow-x:auto;">
+            <table id="ketetapanTable">
+                <thead>
+                    </thead>
+                <tbody>
+                    <tr><td colspan="11">Memuat riwayat...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+    
+    <script src="script.js"></script>
+</body>
+</html>
