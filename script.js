@@ -40,7 +40,7 @@ async function initDashboardPage() {
 async function initTambahWpPage() {
     const form = document.getElementById('pajakForm');
     const kelurahanSelect = document.getElementById('kelurahan');
-    const kecamatanInput = document.getElementById('kecamatan');
+    const kecamatanSelect = document.getElementById('kecamatan');
     const generateCheckbox = document.getElementById('generateNpwpd');
     const npwpdInput = document.getElementById('npwpd');
     const jenisWpGroup = document.getElementById('jenisWpGroup');
@@ -48,31 +48,33 @@ async function initTambahWpPage() {
     try {
         const data = await fetchAllData();
         dataWilayahGlobal = data.wilayah || [];
-        kelurahanSelect.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
-        dataWilayahGlobal.forEach(item => {
+        // Isi dropdown kecamatan unik
+        const kecamatanUnik = [...new Set(dataWilayahGlobal.map(item => item.Kecamatan))];
+        kecamatanSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+        kecamatanUnik.forEach(kec => {
             const option = document.createElement('option');
-            option.value = item.Kelurahan;
-            option.textContent = item.Kelurahan;
-            option.dataset.kodekel = item.KodeKelurahan;
-            option.dataset.kodekec = item.KodeKecamatan;
-            kelurahanSelect.appendChild(option);
+            option.value = kec;
+            option.textContent = kec;
+            kecamatanSelect.appendChild(option);
         });
-        // Destroy instance lama jika ada
-        if (kelurahanChoices) {
-            kelurahanChoices.destroy();
-        }
-        // Inisialisasi Choices.js satu kali saja
-        if (window.Choices) {
-            kelurahanChoices = new Choices(kelurahanSelect, {
-                searchEnabled: true,
-                searchPlaceholderValue: 'Cari di sini...',
-                itemSelectText: '',
-                shouldSort: false,
-                placeholder: true,
-                placeholderValue: 'Cari di sini...'
+        // Reset kelurahan
+        kelurahanSelect.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+        // Saat kecamatan dipilih, isi kelurahan sesuai kecamatan
+        kecamatanSelect.addEventListener('change', function() {
+            kelurahanSelect.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+            if (!this.value) return;
+            const kelurahanFiltered = dataWilayahGlobal.filter(item => item.Kecamatan === this.value);
+            kelurahanFiltered.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.Kelurahan;
+                option.textContent = item.Kelurahan;
+                option.dataset.kodekel = item.KodeKelurahan;
+                option.dataset.kodekec = item.KodeKecamatan;
+                kelurahanSelect.appendChild(option);
             });
-        }
+        });
     } catch (error) {
+        kecamatanSelect.innerHTML = '<option value="">Gagal memuat data</option>';
         kelurahanSelect.innerHTML = '<option value="">Gagal memuat data</option>';
     }
 
@@ -95,7 +97,7 @@ async function initTambahWpPage() {
 
     kelurahanSelect.addEventListener('change', (e) => {
         const wilayahCocok = dataWilayahGlobal.find(w => w.Kelurahan === e.target.value);
-        kecamatanInput.value = wilayahCocok ? wilayahCocok.Kecamatan : '';
+        kecamatanSelect.value = wilayahCocok ? wilayahCocok.Kecamatan : '';
     });
     
     form.addEventListener('submit', handleWpFormSubmit);
