@@ -509,3 +509,41 @@ th {
     margin-bottom: 24px;
   }
 }
+
+/* Perbesar container dan tabel di halaman daftar WP */
+@media (min-width: 1200px) {
+  #page-lihat-wp .container {
+    max-width: 1400px;
+    margin: 40px auto;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+  #page-lihat-wp table#dataTable {
+    width: 100%;
+    min-width: 1200px;
+  }
+  #page-lihat-wp table#dataTable th,
+  #page-lihat-wp table#dataTable td {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  #page-lihat-wp table#dataTable th[colspan],
+  #page-lihat-wp table#dataTable td[colspan] {
+    text-align: center;
+  }
+  #page-lihat-wp table#dataTable th:nth-child(3),
+  #page-lihat-wp table#dataTable td:nth-child(3) {
+    min-width: 180px;
+    max-width: 320px;
+  }
+  #page-lihat-wp table#dataTable th:nth-child(6),
+  #page-lihat-wp table#dataTable td:nth-child(6) {
+    min-width: 180px;
+    max-width: 320px;
+  }
+  #page-lihat-wp table#dataTable th:last-child,
+  #page-lihat-wp table#dataTable td:last-child {
+    min-width: 120px;
+    text-align: center;
+  }
+}
