@@ -1073,3 +1073,12 @@ th {
     gap: 8px 0;
   }
 }
+
+/* Helper text di bawah label form */
+.form-helper {
+  font-size: 0.88em;
+  color: #8a99b3;
+  font-weight: 400;
+  margin-left: 4px;
+  letter-spacing: 0.1px;
+}
