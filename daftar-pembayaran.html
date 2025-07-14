@@ -115,14 +115,12 @@
         if (ketetapanMatch.length >= 2) kodeLayanan = ketetapanMatch[1];
         // Data Master Pajak/Retri
         const master = masterPajakDataGlobal.find(m => m.KodeLayanan === kodeLayanan) || {};
-        // Ayat = Kode Rekening
-        const ayat = master.KodeRekening || '-';
-        // Jenis Pajak = Uraian (atau NamaLayanan jika tidak ada)
-        const jenisPajak = master.Uraian || master.NamaLayanan || '-';
-        // Menyetor atas dasar = ID_Ketetapan
+        // Ayat = NomorRekening
+        const ayat = master.NomorRekening || '-';
+        // Jenis Pajak = NamaLayanan
+        const jenisPajak = master.NamaLayanan || '-';
         // Terbilang
         function terbilang(nilai) {
-            // Fungsi terbilang sederhana (Indonesia)
             const satuan = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
             nilai = parseInt(nilai, 10);
             if (nilai < 12) return satuan[nilai];
@@ -142,7 +140,7 @@
         const html = `
         <div style="font-family:Arial;max-width:800px;margin:auto;padding:24px;">
             <div style="display:flex;align-items:center;gap:16px;">
-                <img src="images/logo.png" style="height:70px;">
+                <img src="/images/logo.png" style="height:70px;">
                 <div style="flex:1;text-align:center;">
                     <div style="font-size:18px;font-weight:bold;">PEMERINTAH KABUPATEN MAMBERAMO RAYA</div>
                     <div style="font-size:17px;font-weight:bold;">BADAN PENDAPATAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</div>
@@ -193,9 +191,7 @@
         </div>
         <script>window.print();<\/script>
         `;
-        const printArea = document.getElementById('printArea');
-        printArea.innerHTML = html;
-        printArea.style.display = 'block';
+        // Tampilkan hanya di window baru, tidak di halaman utama
         const win = window.open('', '', 'width=900,height=1200');
         win.document.write('<html><head><title>Bukti Bayar</title></head><body>' + html + '</body></html>');
         win.document.close();
