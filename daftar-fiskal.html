@@ -92,7 +92,10 @@
                     <td>${row.namaUsaha}</td>
                     <td style="color:green;font-weight:bold;">Lunas</td>
                     <td style="color:green;font-weight:bold;">Lunas</td>
-                    <td><button class="btn-cetak-fiskal" data-npwpd="${row.npwpd}">Cetak Dokumen Fiskal</button></td>
+                    <td>
+                        <button class="btn-cetak-fiskal" data-npwpd="${row.npwpd}">Cetak Dokumen Fiskal</button>
+                        <button class="btn-delete-fiskal" data-npwpd="${row.npwpd}" style="background:#e74c3c;color:#fff;margin-left:8px;">Delete</button>
+                    </td>
                 `;
                 tabelBody.appendChild(tr);
             });
@@ -106,6 +109,13 @@
                 const npwpd = e.target.getAttribute('data-npwpd');
                 const wp = wajibPajakDataGlobal.find(wp => wp.NPWPD === npwpd) || {};
                 printFiskal(npwpd, wp);
+            }
+            // Event delete fiskal
+            if (e.target.classList.contains('btn-delete-fiskal')) {
+                const npwpd = e.target.getAttribute('data-npwpd');
+                if (confirm('Yakin ingin menghapus data fiskal untuk NPWPD ' + npwpd + '?')) {
+                    deleteFiskal(npwpd);
+                }
             }
         });
     });
@@ -179,6 +189,25 @@
         const win = window.open('', '', 'width=900,height=1200');
         win.document.write('<html><head><title>Dokumen Fiskal</title><style>@media print {.btn-cetak-print{display:none!important;}}</style></head><body>' + html + '</body></html>');
         win.document.close();
+    }
+
+    async function deleteFiskal(npwpd) {
+        try {
+            const res = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'deleteFiskal', npwpd })
+            });
+            const result = await res.json();
+            if (result.status === 'sukses') {
+                alert('Data fiskal berhasil dihapus!');
+                location.reload();
+            } else {
+                alert(result.message || 'Gagal menghapus data fiskal!');
+            }
+        } catch (err) {
+            alert('Terjadi error saat menghapus data fiskal!');
+        }
     }
     </script>
 </body>

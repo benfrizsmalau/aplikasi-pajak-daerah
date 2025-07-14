@@ -43,6 +43,7 @@ exports.handler = async (event) => {
                 case 'updateKetetapan': resultMessage = await handleUpdateKetetapan(sheets, body); break;
                 case 'createPembayaran': resultMessage = await handleCreatePembayaran(sheets, body); break;
                 case 'deletePembayaran': resultMessage = await handleDeletePembayaran(sheets, body); break;
+                case 'deleteFiskal': resultMessage = await handleDeleteFiskal(sheets, body); break;
                 default: throw new Error(`Aksi '${body.action}' tidak dikenali`);
             }
             return { statusCode: 200, headers, body: JSON.stringify({ status: 'sukses', ...resultMessage }) };
@@ -280,6 +281,39 @@ async function handleDeletePembayaran(sheets, data) {
         }
     });
     return { message: "Pembayaran berhasil dihapus." };
+}
+
+// Tambahkan handler deleteFiskal
+async function handleDeleteFiskal(sheets, data) {
+    // Ganti dengan nama worksheet fiskal yang sesuai
+    const FISKAL_SHEET_NAME = "Fiskal";
+    const fiskalSheetData = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: FISKAL_SHEET_NAME });
+    const allData = fiskalSheetData.data.values;
+    let rowIndex = -1;
+    for (let i = 1; i < allData.length; i++) {
+        if (allData[i][0] == data.npwpd) { rowIndex = i; break; }
+    }
+    if (rowIndex === -1) throw new Error("NPWPD untuk dihapus di fiskal tidak ditemukan.");
+    const sheetMetadata = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID, ranges: [FISKAL_SHEET_NAME], fields: 'sheets(properties(sheetId,title))' });
+    const sheetInfo = sheetMetadata.data.sheets.find(s => s.properties.title === FISKAL_SHEET_NAME);
+    if (!sheetInfo) throw new Error("Gagal menemukan metadata sheet fiskal.");
+    const sheetId = sheetInfo.properties.sheetId;
+    await sheets.spreadsheets.batchUpdate({
+        spreadsheetId: SPREADSHEET_ID,
+        resource: {
+            requests: [{
+                deleteDimension: {
+                    range: {
+                        sheetId: sheetId,
+                        dimension: "ROWS",
+                        startIndex: rowIndex,
+                        endIndex: rowIndex + 1
+                    }
+                }
+            }]
+        }
+    });
+    return { message: "Data fiskal berhasil dihapus." };
 }
 
 // =================================================================
