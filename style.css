@@ -419,3 +419,40 @@ th {
     font-weight: 500;
   }
 }
+
+/* Tambahan style untuk wp-form-card agar form lebih rapi dan proporsional */
+@media (min-width: 900px) {
+  .wp-form-card {
+    background: #f8fafc;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(60,60,120,0.07);
+    padding: 32px 28px 24px 28px;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 18px;
+  }
+  .form-group input[type="file"] {
+    max-width: 220px;
+    background: #fff;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+  .form-group input[type="file"]:focus {
+    border: none;
+    box-shadow: none;
+  }
+  .form-group input[type="text"],
+  .form-group input[type="number"],
+  .form-group select {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .form-group.full-width input[type="text"] {
+    width: 100%;
+  }
+}
