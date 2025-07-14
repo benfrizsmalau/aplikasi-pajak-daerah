@@ -456,3 +456,56 @@ th {
     width: 100%;
   }
 }
+
+/* Modern Table Style for WP List */
+@media (min-width: 900px) {
+  #page-lihat-wp table#dataTable {
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(60,60,120,0.09);
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    min-width: 1100px;
+    background: #fff;
+  }
+  #page-lihat-wp table#dataTable thead th {
+    background: #1976d2;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 12px 10px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 2px solid #1565c0;
+    letter-spacing: 0.5px;
+  }
+  #page-lihat-wp table#dataTable tbody td {
+    padding: 10px 10px;
+    font-size: 0.98rem;
+    border-bottom: 1px solid #e3e8ee;
+    background: #fff;
+  }
+  #page-lihat-wp table#dataTable tbody tr:nth-child(odd) td {
+    background: #f6fafd;
+  }
+  #page-lihat-wp table#dataTable tbody tr:hover td {
+    background: #e3f2fd;
+  }
+  #page-lihat-wp table#dataTable th, #page-lihat-wp table#dataTable td {
+    text-align: left;
+    white-space: nowrap;
+  }
+  #page-lihat-wp table#dataTable th:first-child, #page-lihat-wp table#dataTable td:first-child {
+    border-top-left-radius: 12px;
+  }
+  #page-lihat-wp table#dataTable th:last-child, #page-lihat-wp table#dataTable td:last-child {
+    border-top-right-radius: 12px;
+  }
+  #page-lihat-wp .container > div[style*="overflow-x:auto"] {
+    background: none;
+    border-radius: 12px;
+    box-shadow: none;
+    margin-bottom: 24px;
+  }
+}

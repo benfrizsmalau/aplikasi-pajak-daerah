@@ -414,9 +414,24 @@ function populateWpDataTable(wajibPajakData) {
     if (!tableHead || !tableBody) return;
     tableHead.innerHTML = ''; tableBody.innerHTML = '';
     if (wajibPajakData.length > 0) {
+        // Mapping header: key Google Sheet -> label user-friendly
+        const headerMap = {
+            'NPWPD': 'NPWPD',
+            'JenisWP': 'Jenis WP',
+            'Nama Usaha': 'Nama Usaha',
+            'Nama Pemilik': 'Nama Pemilik',
+            'NIK KTP': 'NIK',
+            'Alamat': 'Alamat Usaha',
+            'Telephone': 'No. Telepon',
+            'Kelurahan': 'Kelurahan',
+            'Kecamatan': 'Kecamatan',
+            'Foto Pemilik': 'Foto Pemilik',
+            'Foto Tempat Usaha': 'Foto Tempat Usaha',
+            'Foto KTP': 'Foto KTP'
+        };
         const headers = Object.keys(wajibPajakData[0]);
         const headerRow = document.createElement('tr');
-        headers.forEach(h => { headerRow.innerHTML += `<th>${h}</th>`; });
+        headers.forEach(h => { headerRow.innerHTML += `<th>${headerMap[h] || h}</th>`; });
         headerRow.innerHTML += `<th>Aksi</th>`;
         tableHead.appendChild(headerRow);
         wajibPajakData.forEach(rowData => {
