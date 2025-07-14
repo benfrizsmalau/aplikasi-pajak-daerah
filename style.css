@@ -1026,3 +1026,42 @@ th {
     gap: 8px;
   }
 }
+
+/* Modern Form Card Senada Dashboard */
+.wp-form-card {
+  background: linear-gradient(120deg, #e3f2fd 60%, #f1f8e9 100%);
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(60,60,120,0.11);
+  padding: 32px 32px 24px 32px;
+  max-width: 540px;
+  margin: 0 auto 32px auto;
+  border: 1.5px solid #e3e8ee;
+}
+.form-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.45rem;
+  font-weight: bold;
+  color: #1976d2;
+  letter-spacing: 0.5px;
+  margin-bottom: 24px;
+  justify-content: center;
+}
+.form-title-icon {
+  font-size: 2.1rem;
+  filter: drop-shadow(0 2px 6px rgba(60,60,120,0.10));
+}
+@media (max-width: 900px) {
+  .wp-form-card {
+    padding: 18px 8px 14px 8px;
+    max-width: 98vw;
+  }
+  .form-title {
+    font-size: 1.1rem;
+    margin-bottom: 14px;
+  }
+  .form-title-icon {
+    font-size: 1.3rem;
+  }
+}
