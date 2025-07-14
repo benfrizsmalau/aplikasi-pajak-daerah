@@ -41,10 +41,12 @@ exports.handler = async (event) => {
                 case 'createKetetapan': resultMessage = await handleCreateKetetapan(sheets, body); break;
                 case 'deleteKetetapan': resultMessage = await handleDeleteKetetapan(sheets, body); break;
                 case 'updateKetetapan': resultMessage = await handleUpdateKetetapan(sheets, body); break;
+                case 'createPembayaran': resultMessage = await handleCreatePembayaran(sheets, body); break;
                 default: throw new Error(`Aksi '${body.action}' tidak dikenali`);
             }
             return { statusCode: 200, headers, body: JSON.stringify({ status: 'sukses', ...resultMessage }) };
         }
+
     } catch (error) {
         return { statusCode: 500, headers, body: JSON.stringify({ status: 'gagal', message: error.message }) };
     }
@@ -73,8 +75,7 @@ async function handleCreateWp(auth, sheets, data) {
     let jenisWp = data.jenisWp;
 
     if (data.generate_mode === true) {
-        const lastRow = allNpwpd.length;
-        const nextSequence = (lastRow).toString().padStart(6, '0');
+        const nextSequence = (allNpwpd.length).toString().padStart(6, '0');
         newNpwpd = `P.${data.jenisWp}.${nextSequence}.${data.kodeKecamatan}.${data.kodeKelurahan}`;
     } else {
         newNpwpd = data.npwpd;
@@ -103,10 +104,13 @@ async function handleCreateWp(auth, sheets, data) {
 
 async function handleUpdateWp(sheets, data) {
     const response = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: WP_SHEET_NAME });
-    const allData = response.data.values; let rowIndex = -1;
-    for (let i = 1; i < allData.length; i++) { if (allData[i][0] == data.npwpd) { rowIndex = i + 1; break; } }
+    const allData = response.data.values; let rowIndex = -1; let oldDataRow;
+    for (let i = 1; i < allData.length; i++) { if (allData[i][0] == data.npwpd) { rowIndex = i + 1; oldDataRow = allData[i]; break; } }
     if (rowIndex === -1) throw new Error("NPWPD untuk update tidak ditemukan.");
-    const updatedRow = [ data.npwpd, data.jenisWp, data.namaUsaha, data.namaPemilik, data.nikKtp, data.alamat, data.telephone, data.kelurahan, data.kecamatan ];
+    const updatedRow = [
+        data.npwpd, oldDataRow[1], data.namaUsaha, data.namaPemilik, data.nikKtp, data.alamat,
+        data.telephone, data.kelurahan, data.kecamatan
+    ];
     await sheets.spreadsheets.values.update({ spreadsheetId: SPREADSHEET_ID, range: `${WP_SHEET_NAME}!A${rowIndex}:I${rowIndex}`, valueInputOption: 'USER_ENTERED', resource: { values: [updatedRow] }, });
     return { message: "Data WP berhasil diperbarui" };
 }
@@ -209,6 +213,29 @@ async function handleUpdateKetetapan(sheets, data) {
         valueInputOption: 'USER_ENTERED', resource: { values: [updatedRowValues] },
     });
     return { message: "Ketetapan berhasil diperbarui" };
+}
+
+async function handleCreatePembayaran(sheets, data) {
+    const pembayaranData = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: PEMBAYARAN_SHEET_NAME });
+    const allPembayaran = pembayaranData.data.values || [];
+    const newPembayaranId = `PAY-${(allPembayaran.length).toString().padStart(7, '0')}`;
+    const newRow = [[ newPembayaranId, data.id_ketetapan, new Date(data.tanggalBayar).toISOString(), parseFloat(data.jumlahBayar), data.metodeBayar ]];
+    await sheets.spreadsheets.values.append({ spreadsheetId: SPREADSHEET_ID, range: PEMBAYARAN_SHEET_NAME, valueInputOption: 'USER_ENTERED', resource: { values: newRow } });
+    const ketetapanData = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: KETETAPAN_SHEET_NAME });
+    const allKetetapan = ketetapanData.data.values; let rowIndex = -1; let totalTagihan = 0;
+    for (let i = 1; i < allKetetapan.length; i++) {
+        if (allKetetapan[i][0] == data.id_ketetapan) {
+            rowIndex = i + 1; totalTagihan = parseFloat(allKetetapan[i][7]); break;
+        }
+    }
+    if (rowIndex === -1) throw new Error("ID Ketetapan tidak ditemukan untuk update status.");
+    const pembayaranUntukKetetapanIni = (await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: PEMBAYARAN_SHEET_NAME })).data.values || [];
+    let totalSudahDibayar = 0;
+    pembayaranUntukKetetapanIni.forEach(row => { if (row[1] == data.id_ketetapan) totalSudahDibayar += parseFloat(row[3]); });
+    if (totalSudahDibayar >= totalTagihan) {
+        await sheets.spreadsheets.values.update({ spreadsheetId: SPREADSHEET_ID, range: `${KETETAPAN_SHEET_NAME}!I${rowIndex}`, valueInputOption: 'USER_ENTERED', resource: { values: [["Lunas"]] } });
+    }
+    return { message: "Pembayaran berhasil dicatat." };
 }
 
 // =================================================================

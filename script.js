@@ -1,3 +1,5 @@
+// File: script.js (Final dan Lengkap)
+
 // --- KONFIGURASI ---
 // Alamat backend di Netlify. Ini sudah final dan tidak perlu diubah.
 const apiUrl = '/.netlify/functions/api';
@@ -82,7 +84,7 @@ async function initTambahWpPage() {
         kecamatanInput.value = wilayahCocok ? wilayahCocok.Kecamatan : '';
     });
     
-    form.addEventListener('submit', handleFormSubmit);
+    form.addEventListener('submit', handleWpFormSubmit);
 }
 
 async function initLihatWpPage() {
@@ -90,7 +92,7 @@ async function initLihatWpPage() {
         const data = await fetchAllData();
         dataWajibPajakGlobal = data.wajibPajak || [];
         dataWilayahGlobal = data.wilayah || [];
-        populateDataTable(dataWajibPajakGlobal);
+        populateWpDataTable(dataWajibPajakGlobal);
         setupWpEditModal();
         
         document.getElementById('searchInput').addEventListener('input', (e) => {
@@ -99,7 +101,7 @@ async function initLihatWpPage() {
                 String(item.NPWPD).toLowerCase().includes(searchTerm) ||
                 String(item['Nama Usaha']).toLowerCase().includes(searchTerm)
             );
-            populateDataTable(filteredData);
+            populateWpDataTable(filteredData);
         });
     } catch (error) {
         document.querySelector("#dataTable tbody").innerHTML = `<tr><td colspan="12">Gagal memuat data: ${error.message}</td></tr>`;
@@ -168,7 +170,7 @@ async function initDetailPage() {
 // Fungsi-fungsi Aksi (CRUD Handlers)
 // =================================================================
 
-async function handleFormSubmit(event) {
+async function handleWpFormSubmit(event) {
     event.preventDefault();
     const submitButton = document.getElementById('submitButton');
     const statusDiv = document.getElementById('status');
@@ -224,7 +226,7 @@ async function handleFormSubmit(event) {
     }
 }
 
-async function handleDeleteClick(npwpd) {
+async function handleDeleteWpClick(npwpd) {
     if (!confirm(`Anda yakin ingin menghapus data WP dengan NPWPD: ${npwpd}?`)) return;
     try {
         const result = await postData({ action: 'deleteWp', npwpd: npwpd });
@@ -235,7 +237,7 @@ async function handleDeleteClick(npwpd) {
     }
 }
 
-function handleEditClick(npwpd) {
+function handleEditWpClick(npwpd) {
     const dataToEdit = dataWajibPajakGlobal.find(item => item.NPWPD == npwpd);
     if (!dataToEdit) { alert('Data tidak ditemukan!'); return; }
     document.getElementById('editNpwd').value = dataToEdit.NPWPD;
@@ -366,11 +368,11 @@ async function postData(data) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        if (!response.ok) {
-            const errorResult = await response.json();
-            throw new Error(errorResult.message || `HTTP error! status: ${response.status}`);
+        const result = await response.json();
+        if (result.status === 'gagal' || !response.ok) {
+            throw new Error(result.message || `HTTP error! status: ${response.status}`);
         }
-        return await response.json();
+        return result;
     } catch (error) {
         console.error('Post error:', error);
         throw error;
@@ -484,7 +486,7 @@ function displayKetetapanHistory(riwayatData) {
             const idKetetapan = rowData['ID_Ketetapan'];
             const aksiCell = document.createElement('td');
             aksiCell.innerHTML = `
-                <a href="cetak-skpd.html?id=${idKetetapan}" target="_blank" class="btn-aksi" style="background-color: #007bff; text-decoration: none; display: inline-block; margin-right: 5px;">Cetak</a>
+                <a href="cetak-skpd.html?id=${idKetetapan}" target="_blank" class="btn-aksi" style="background-color: #0d6efd; text-decoration: none; display: inline-block; margin-right: 5px;">Cetak</a>
                 <button class="btn-aksi btn-edit" onclick="handleEditKetetapanClick('${idKetetapan}')">Edit</button>
                 <button class="btn-aksi btn-hapus" onclick="handleDeleteKetetapanClick('${idKetetapan}')">Hapus</button>
             `;
