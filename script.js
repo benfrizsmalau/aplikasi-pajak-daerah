@@ -1,5 +1,3 @@
-// File: script.js (Final dan Lengkap)
-
 // --- KONFIGURASI ---
 // Alamat backend di Netlify. Ini sudah final dan tidak perlu diubah.
 const apiUrl = '/.netlify/functions/api';
@@ -410,7 +408,7 @@ async function fetchAllData() {
     return result;
 }
 
-function populateDataTable(wajibPajakData) {
+function populateWpDataTable(wajibPajakData) {
     const tableHead = document.querySelector("#dataTable thead");
     const tableBody = document.querySelector("#dataTable tbody");
     if (!tableHead || !tableBody) return;
@@ -437,7 +435,7 @@ function populateDataTable(wajibPajakData) {
             });
             const npwpd = rowData['NPWPD'];
             const aksiCell = document.createElement('td');
-            aksiCell.innerHTML = `<button class="btn-aksi btn-edit" onclick="handleEditClick('${npwpd}')">Edit</button> <button class="btn-aksi btn-hapus" onclick="handleDeleteClick('${npwpd}')">Hapus</button>`;
+            aksiCell.innerHTML = `<button class="btn-aksi btn-edit" onclick="handleEditWpClick('${npwpd}')">Edit</button> <button class="btn-aksi btn-hapus" onclick="handleDeleteWpClick('${npwpd}')">Hapus</button>`;
             row.appendChild(aksiCell);
             tableBody.appendChild(row);
         });
@@ -475,7 +473,7 @@ function displayKetetapanHistory(riwayatData) {
                 const cell = document.createElement('td');
                 let cellData = rowData[header];
                 if (header === 'TanggalKetetapan' && cellData) {
-                    cellData = new Date(cellData).toLocaleDateString('id-ID');
+                    cellData = new Date(cellData).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
                 }
                 if (['JumlahPokok', 'Denda', 'TotalTagihan'].includes(header)) {
                     cellData = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(cellData);
