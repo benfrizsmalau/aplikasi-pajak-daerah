@@ -8,6 +8,7 @@ let dataWajibPajakGlobal = [];
 let dataWilayahGlobal = [];
 let dataMasterPajakGlobal = [];
 let dataKetetapanGlobal = [];
+let kelurahanChoices = null;
 
 // Router utama yang berjalan setelah halaman HTML selesai dimuat
 document.addEventListener('DOMContentLoaded', () => {
@@ -56,9 +57,13 @@ async function initTambahWpPage() {
             option.dataset.kodekec = item.KodeKecamatan;
             kelurahanSelect.appendChild(option);
         });
-        // Inisialisasi Choices.js setelah kelurahan terisi
+        // Destroy instance lama jika ada
+        if (kelurahanChoices) {
+            kelurahanChoices.destroy();
+        }
+        // Inisialisasi Choices.js satu kali saja
         if (window.Choices) {
-            new Choices(kelurahanSelect, {
+            kelurahanChoices = new Choices(kelurahanSelect, {
                 searchEnabled: true,
                 searchPlaceholderValue: 'Cari di sini...',
                 itemSelectText: '',
