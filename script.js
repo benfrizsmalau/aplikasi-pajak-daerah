@@ -460,8 +460,28 @@ function populateWpDataTable(wajibPajakData) {
 }
 
 function displayDetailData(item) {
-    const detailContent = document.getElementById('detailContent');
-    detailContent.innerHTML = `<dl class="detail-grid"><dt>NPWPD</dt><dd>${item.NPWPD||'-'}</dd><dt>Nama Usaha</dt><dd>${item['Nama Usaha']||'-'}</dd><dt>Nama Pemilik</dt><dd>${item['Nama Pemilik']||'-'}</dd><dt>NIK KTP</dt><dd>${item['NIK KTP']||'-'}</dd><dt>Alamat</dt><dd>${item.Alamat||'-'}</dd><dt>Telephone</dt><dd>${item.Telephone||'-'}</dd><dt>Kelurahan</dt><dd>${item.Kelurahan||'-'}</dd><dt>Kecamatan</dt><dd>${item.Kecamatan||'-'}</dd></dl>`;
+    // Foto pemilik di kiri atas (seperti KTP)
+    const fotoSlot = document.getElementById('detailFotoKtpSlot');
+    const dataSlot = document.getElementById('detailDataKtpSlot');
+    if (fotoSlot && dataSlot) {
+        fotoSlot.innerHTML = '';
+        dataSlot.innerHTML = '';
+        if (item['Foto Pemilik']) {
+            fotoSlot.innerHTML = `<img src="${item['Foto Pemilik']}" alt="Foto Pemilik"><p>Foto Pemilik</p>`;
+        } else {
+            fotoSlot.innerHTML = `<div style='width:120px;height:150px;background:#e3e8ee;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#888;'>Tidak ada foto</div><p>Foto Pemilik</p>`;
+        }
+        dataSlot.innerHTML = `<dl class="detail-grid">
+            <dt>NPWPD</dt><dd>${item.NPWPD||'-'}</dd>
+            <dt>Nama Usaha</dt><dd>${item['Nama Usaha']||'-'}</dd>
+            <dt>Nama Pemilik</dt><dd>${item['Nama Pemilik']||'-'}</dd>
+            <dt>NIK</dt><dd>${item['NIK KTP']||'-'}</dd>
+            <dt>Alamat Usaha</dt><dd>${item.Alamat||'-'}</dd>
+            <dt>No. Telepon</dt><dd>${item.Telephone||'-'}</dd>
+            <dt>Kelurahan</dt><dd>${item.Kelurahan||'-'}</dd>
+            <dt>Kecamatan</dt><dd>${item.Kecamatan||'-'}</dd>
+        </dl>`;
+    }
 }
 
 function displayPhotos(item) {
