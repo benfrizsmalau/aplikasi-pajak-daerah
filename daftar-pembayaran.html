@@ -43,14 +43,17 @@
             </tbody>
         </table>
     </main>
+    <div id="printArea" style="display:none;"></div>
     <script>
     const apiUrl = '/.netlify/functions/api';
+    let pembayaranDataGlobal = [];
     document.addEventListener('DOMContentLoaded', async () => {
         const tabelBody = document.querySelector('#tabelPembayaran tbody');
         try {
             const response = await fetch(apiUrl);
             const data = await response.json();
             const pembayaran = data.pembayaran || [];
+            pembayaranDataGlobal = pembayaran;
             if (pembayaran.length === 0) {
                 tabelBody.innerHTML = '<tr><td colspan="10">Belum ada data pembayaran.</td></tr>';
                 return;
@@ -75,7 +78,59 @@
         } catch (err) {
             tabelBody.innerHTML = '<tr><td colspan="10">Gagal memuat data pembayaran.</td></tr>';
         }
+
+        // Event print
+        tabelBody.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn-print')) {
+                const idPembayaran = e.target.getAttribute('data-id');
+                const pembayaran = pembayaranDataGlobal.find(p => p.ID_Pembayaran === idPembayaran);
+                if (pembayaran) {
+                    printBuktiBayar(pembayaran);
+                }
+            }
+        });
     });
+
+    function printBuktiBayar(data) {
+        // Tentukan jenis dokumen
+        let jenis = 'SSPD';
+        if ((data.ID_Ketetapan || '').toUpperCase().includes('SKRD')) jenis = 'SSRD';
+        // Format nomor dokumen
+        const bulanRomawi = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+        const tgl = new Date(data.TanggalBayar);
+        const nomorUrut = (data.ID_Pembayaran || '').replace(/[^0-9]/g, '').padStart(7, '0');
+        const nomorDok = `${nomorUrut}/${jenis}/${bulanRomawi[tgl.getMonth()]}/${tgl.getFullYear()}`;
+        // Template dokumen sederhana
+        const html = `
+        <div style="font-family:Arial;max-width:600px;margin:auto;padding:24px;">
+            <h2 style="text-align:center;">BUKTI PEMBAYARAN ${jenis}</h2>
+            <hr>
+            <table style="width:100%;margin-bottom:16px;">
+                <tr><td><b>Nomor</b></td><td>: ${nomorDok}</td></tr>
+                <tr><td><b>NPWPD</b></td><td>: ${data.NPWPD || ''}</td></tr>
+                <tr><td><b>ID Ketetapan</b></td><td>: ${data.ID_Ketetapan || ''}</td></tr>
+                <tr><td><b>Tanggal Bayar</b></td><td>: ${data.TanggalBayar || ''}</td></tr>
+                <tr><td><b>Jumlah Bayar</b></td><td>: Rp ${Number(data.JumlahBayar || 0).toLocaleString('id-ID')}</td></tr>
+                <tr><td><b>Metode</b></td><td>: ${data.MetodeBayar || ''}</td></tr>
+                <tr><td><b>Operator</b></td><td>: ${data.Operator || ''}</td></tr>
+                <tr><td><b>Status</b></td><td>: ${data.StatusPembayaran || ''}</td></tr>
+            </table>
+            <div style="margin-top:32px;text-align:right;">
+                <span>${data.Operator || ''}, ${tgl.toLocaleDateString('id-ID')}</span>
+            </div>
+            <div style="margin-top:48px;text-align:right;">
+                <span><b>(.............................................)</b></span>
+            </div>
+        </div>
+        <script>window.print();<\/script>
+        `;
+        const printArea = document.getElementById('printArea');
+        printArea.innerHTML = html;
+        printArea.style.display = 'block';
+        const win = window.open('', '', 'width=800,height=600');
+        win.document.write('<html><head><title>Bukti Bayar</title></head><body>' + html + '</body></html>');
+        win.document.close();
+    }
     </script>
     
 </body>
