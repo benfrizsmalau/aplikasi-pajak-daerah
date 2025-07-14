@@ -115,9 +115,10 @@
         if (ketetapanMatch.length >= 2) kodeLayanan = ketetapanMatch[1];
         // Data Master Pajak/Retri
         const master = masterPajakDataGlobal.find(m => m.KodeLayanan === kodeLayanan) || {};
-        // Ayat & Jenis Pajak
-        const ayat = master.Ayat || '-';
-        const jenisPajak = master.NamaLayanan || '-';
+        // Ayat = Kode Rekening
+        const ayat = master.KodeRekening || '-';
+        // Jenis Pajak = Uraian (atau NamaLayanan jika tidak ada)
+        const jenisPajak = master.Uraian || master.NamaLayanan || '-';
         // Menyetor atas dasar = ID_Ketetapan
         // Terbilang
         function terbilang(nilai) {
@@ -180,21 +181,14 @@
             </table>
             <div style="font-size:13px;margin-bottom:16px;">Terbilang : <b>${terbilangStr}</b></div>
             <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:32px;">
-                <div>
-                    Ruang untuk teraan Kas<br>Register / Tanda Tangan / Cap
-                </div>
                 <div style="text-align:center;">
-                    Diterima Oleh<br>Kepala Bidang Pendapatan
-                </div>
-                <div style="text-align:center;">
-                    Burmeso, ${tgl.toLocaleDateString('id-ID')}<br>Penyetor
-                </div>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:48px;">
-                <div>
+                    Diterima Oleh<br>Kepala Bidang Pendapatan<br><br><br>
                     <b>HERMAN TARIBABA, SE</b><br>NIP. 197610202003121007
                 </div>
-                <div style="text-align:center;font-weight:bold;">${wp['Nama Usaha'] || '-'}</div>
+                <div style="text-align:center;">
+                    Burmeso, ${tgl.toLocaleDateString('id-ID')}<br>Penyetor<br><br><br>
+                    <b>${wp['Nama Usaha'] || '-'}</b>
+                </div>
             </div>
         </div>
         <script>window.print();<\/script>
