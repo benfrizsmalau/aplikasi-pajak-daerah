@@ -71,17 +71,35 @@ async function handleGet(sheets) {
 }
 
 async function handleCreateWp(auth, sheets, data) {
+    // Validasi field wajib
+    const requiredFields = [
+        'namaUsaha', 'namaPemilik', 'nikKtp', 'alamat', 'telephone', 'kelurahan', 'kecamatan'
+    ];
+    for (const field of requiredFields) {
+        if (!data[field] || String(data[field]).trim() === '') {
+            throw new Error(`Field '${field}' wajib diisi.`);
+        }
+    }
+    // Validasi NIK
+    if (!/^\d{16}$/.test(data.nikKtp)) {
+        throw new Error('NIK KTP harus 16 digit angka.');
+    }
+    // Validasi nomor telepon
+    if (!/^\d{10,}$/.test(data.telephone)) {
+        throw new Error('Nomor telepon harus minimal 10 digit angka.');
+    }
+    // Validasi NPWPD tidak boleh ganda (jika manual)
     const wpSheetData = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${WP_SHEET_NAME}!A:A` });
     const allNpwpd = (wpSheetData.data.values || []).flat();
     let newNpwpd;
     let jenisWp = data.jenisWp;
-
     if (data.generate_mode === true) {
         const nextSequence = (allNpwpd.length).toString().padStart(6, '0');
         newNpwpd = `P.${data.jenisWp}.${nextSequence}.${data.kodeKecamatan}.${data.kodeKelurahan}`;
     } else {
         newNpwpd = data.npwpd;
         if (allNpwpd.includes(newNpwpd)) throw new Error(`NPWPD ${newNpwpd} sudah terdaftar.`);
+        if (!newNpwpd || String(newNpwpd).trim() === '') throw new Error('NPWPD wajib diisi.');
     }
 
     const drive = google.drive({ version: 'v3', auth });
