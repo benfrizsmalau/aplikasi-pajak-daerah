@@ -547,3 +547,76 @@ th {
     text-align: center;
   }
 }
+
+/* Modern Detail WP Card */
+@media (min-width: 900px) {
+  .detail-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(60,60,120,0.13);
+    padding: 36px 44px 32px 44px;
+    max-width: 700px;
+    margin: 0 auto 32px auto;
+  }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    row-gap: 18px;
+    column-gap: 24px;
+    font-size: 1.08rem;
+  }
+  .detail-grid dt {
+    font-weight: bold;
+    color: #2d3a4a;
+    margin-bottom: 0;
+    align-self: center;
+  }
+  .detail-grid dd {
+    margin: 0;
+    color: #3a4a5d;
+    font-weight: 500;
+    background: #f8fafc;
+    border-radius: 7px;
+    padding: 7px 14px;
+    align-self: center;
+  }
+  .detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 700px;
+    margin: 0 auto 18px auto;
+  }
+  .foto-grid {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin: 18px 0 32px 0;
+    justify-content: flex-start;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .foto-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(60,60,120,0.10);
+    padding: 10px 10px 6px 10px;
+    text-align: center;
+    width: 140px;
+  }
+  .foto-card img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    box-shadow: 0 1px 6px rgba(60,60,120,0.10);
+  }
+  .foto-card p {
+    font-size: 0.98rem;
+    color: #2d3a4a;
+    margin: 0;
+    font-weight: 500;
+  }
+}
