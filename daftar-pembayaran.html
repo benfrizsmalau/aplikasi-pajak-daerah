@@ -47,6 +47,8 @@
     <script>
     const apiUrl = '/.netlify/functions/api';
     let pembayaranDataGlobal = [];
+    let wajibPajakDataGlobal = [];
+    let masterPajakDataGlobal = [];
     document.addEventListener('DOMContentLoaded', async () => {
         const tabelBody = document.querySelector('#tabelPembayaran tbody');
         try {
@@ -54,6 +56,8 @@
             const data = await response.json();
             const pembayaran = data.pembayaran || [];
             pembayaranDataGlobal = pembayaran;
+            wajibPajakDataGlobal = data.wajibPajak || [];
+            masterPajakDataGlobal = data.masterPajak || [];
             if (pembayaran.length === 0) {
                 tabelBody.innerHTML = '<tr><td colspan="10">Belum ada data pembayaran.</td></tr>';
                 return;
@@ -97,29 +101,100 @@
         if ((data.ID_Ketetapan || '').toUpperCase().includes('SKRD')) jenis = 'SSRD';
         // Format nomor dokumen
         const bulanRomawi = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
-        const tgl = new Date(data.TanggalBayar);
+        const tgl = new Date(); // tanggal print
+        const tglBayar = new Date(data.TanggalBayar);
         const nomorUrut = (data.ID_Pembayaran || '').replace(/[^0-9]/g, '').padStart(7, '0');
         const nomorDok = `${nomorUrut}/${jenis}/${bulanRomawi[tgl.getMonth()]}/${tgl.getFullYear()}`;
-        // Template dokumen sederhana
+        // Data WP
+        const wp = wajibPajakDataGlobal.find(wp => wp.NPWPD === data.NPWPD) || {};
+        // Data Ketetapan
+        const idKetetapan = data.ID_Ketetapan || '';
+        // KodeLayanan dari ID_Ketetapan (format: .../kodeLayanan/...) atau dari data ketetapan jika tersedia
+        let kodeLayanan = '';
+        const ketetapanMatch = idKetetapan.split('/');
+        if (ketetapanMatch.length >= 2) kodeLayanan = ketetapanMatch[1];
+        // Data Master Pajak/Retri
+        const master = masterPajakDataGlobal.find(m => m.KodeLayanan === kodeLayanan) || {};
+        // Ayat & Jenis Pajak
+        const ayat = master.Ayat || '-';
+        const jenisPajak = master.NamaLayanan || '-';
+        // Menyetor atas dasar = ID_Ketetapan
+        // Terbilang
+        function terbilang(nilai) {
+            // Fungsi terbilang sederhana (Indonesia)
+            const satuan = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+            nilai = parseInt(nilai, 10);
+            if (nilai < 12) return satuan[nilai];
+            if (nilai < 20) return terbilang(nilai - 10) + " Belas";
+            if (nilai < 100) return terbilang(Math.floor(nilai / 10)) + " Puluh " + terbilang(nilai % 10);
+            if (nilai < 200) return "Seratus " + terbilang(nilai - 100);
+            if (nilai < 1000) return terbilang(Math.floor(nilai / 100)) + " Ratus " + terbilang(nilai % 100);
+            if (nilai < 2000) return "Seribu " + terbilang(nilai - 1000);
+            if (nilai < 1000000) return terbilang(Math.floor(nilai / 1000)) + " Ribu " + terbilang(nilai % 1000);
+            if (nilai < 1000000000) return terbilang(Math.floor(nilai / 1000000)) + " Juta " + terbilang(nilai % 1000000);
+            return "Terlalu Besar";
+        }
+        const jumlahBayar = Number(data.JumlahBayar || 0);
+        const jumlahBayarStr = jumlahBayar.toLocaleString('id-ID');
+        const terbilangStr = terbilang(jumlahBayar) + ' Rupiah';
+        // Template dokumen sesuai contoh
         const html = `
-        <div style="font-family:Arial;max-width:600px;margin:auto;padding:24px;">
-            <h2 style="text-align:center;">BUKTI PEMBAYARAN ${jenis}</h2>
-            <hr>
-            <table style="width:100%;margin-bottom:16px;">
-                <tr><td><b>Nomor</b></td><td>: ${nomorDok}</td></tr>
-                <tr><td><b>NPWPD</b></td><td>: ${data.NPWPD || ''}</td></tr>
-                <tr><td><b>ID Ketetapan</b></td><td>: ${data.ID_Ketetapan || ''}</td></tr>
-                <tr><td><b>Tanggal Bayar</b></td><td>: ${data.TanggalBayar || ''}</td></tr>
-                <tr><td><b>Jumlah Bayar</b></td><td>: Rp ${Number(data.JumlahBayar || 0).toLocaleString('id-ID')}</td></tr>
-                <tr><td><b>Metode</b></td><td>: ${data.MetodeBayar || ''}</td></tr>
-                <tr><td><b>Operator</b></td><td>: ${data.Operator || ''}</td></tr>
-                <tr><td><b>Status</b></td><td>: ${data.StatusPembayaran || ''}</td></tr>
-            </table>
-            <div style="margin-top:32px;text-align:right;">
-                <span>${data.Operator || ''}, ${tgl.toLocaleDateString('id-ID')}</span>
+        <div style="font-family:Arial;max-width:800px;margin:auto;padding:24px;">
+            <div style="display:flex;align-items:center;gap:16px;">
+                <img src="images/logo.png" style="height:70px;">
+                <div style="flex:1;text-align:center;">
+                    <div style="font-size:18px;font-weight:bold;">PEMERINTAH KABUPATEN MAMBERAMO RAYA</div>
+                    <div style="font-size:17px;font-weight:bold;">BADAN PENDAPATAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</div>
+                    <div style="font-size:13px;">Perkantoran Otonom Burmeso, Distrik Mamberamo Tengah<br>Kabupaten Mamberamo Raya, Provinsi Papua</div>
+                </div>
             </div>
-            <div style="margin-top:48px;text-align:right;">
-                <span><b>(.............................................)</b></span>
+            <hr>
+            <div style="text-align:center;margin:16px 0 8px 0;">
+                <div style="font-size:15px;font-weight:bold;">SURAT SETORAN PAJAK / RETRIBUSI DAERAH</div>
+                <div style="font-size:15px;font-weight:bold;">(${jenis})</div>
+                <div style="font-size:14px;">Nomor : <b>${nomorDok}</b></div>
+            </div>
+            <table style="width:100%;margin-bottom:8px;font-size:13px;">
+                <tr><td style="width:160px;">Nama Usaha</td><td>: ${wp['Nama Usaha'] || '-'}</td></tr>
+                <tr><td>Alamat</td><td>: ${wp.Alamat || '-'}</td></tr>
+                <tr><td>NPWPD</td><td>: ${data.NPWPD || '-'}</td></tr>
+                <tr><td>Menyetor Atas Dasar</td><td>: ${idKetetapan}</td></tr>
+            </table>
+            <table border="1" style="border-collapse:collapse;width:100%;font-size:13px;margin-bottom:8px;">
+                <tr style="background:#f3f3f3;text-align:center;">
+                    <th style="width:40px;">No</th>
+                    <th>Ayat</th>
+                    <th>Jenis Pajak / Retribusi Daerah</th>
+                    <th style="width:150px;">Jumlah (Rp)</th>
+                </tr>
+                <tr>
+                    <td style="text-align:center;">1</td>
+                    <td style="text-align:center;">${ayat}</td>
+                    <td>${jenisPajak}</td>
+                    <td style="text-align:right;">Rp. ${jumlahBayarStr}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align:right;font-weight:bold;">Jumlah Keseluruhan</td>
+                    <td style="text-align:right;font-weight:bold;">Rp. ${jumlahBayarStr}</td>
+                </tr>
+            </table>
+            <div style="font-size:13px;margin-bottom:16px;">Terbilang : <b>${terbilangStr}</b></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:32px;">
+                <div>
+                    Ruang untuk teraan Kas<br>Register / Tanda Tangan / Cap
+                </div>
+                <div style="text-align:center;">
+                    Diterima Oleh<br>Kepala Bidang Pendapatan
+                </div>
+                <div style="text-align:center;">
+                    Burmeso, ${tgl.toLocaleDateString('id-ID')}<br>Penyetor
+                </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:48px;">
+                <div>
+                    <b>HERMAN TARIBABA, SE</b><br>NIP. 197610202003121007
+                </div>
+                <div style="text-align:center;font-weight:bold;">${wp['Nama Usaha'] || '-'}</div>
             </div>
         </div>
         <script>window.print();<\/script>
@@ -127,7 +202,7 @@
         const printArea = document.getElementById('printArea');
         printArea.innerHTML = html;
         printArea.style.display = 'block';
-        const win = window.open('', '', 'width=800,height=600');
+        const win = window.open('', '', 'width=900,height=1200');
         win.document.write('<html><head><title>Bukti Bayar</title></head><body>' + html + '</body></html>');
         win.document.close();
     }
