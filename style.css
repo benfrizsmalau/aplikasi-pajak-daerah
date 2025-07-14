@@ -945,6 +945,15 @@ th {
   margin-left: auto;
   margin-right: auto;
 }
+.dashboard-chart-section h3 {
+  font-size: 1.08rem;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+#dashboardChart {
+  height: 60px!important;
+  max-height: 80px;
+}
 @media (min-width: 1200px) {
   .dashboard-grid {
     grid-template-columns: repeat(4, 1fr);
@@ -958,5 +967,62 @@ th {
 @media (max-width: 700px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Dashboard compact: card lebih kecil, grid rapat, grafik ramping */
+.dashboard-grid {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 18px 0 0 0;
+}
+.stat-card {
+  padding: 18px 12px 14px 12px;
+  border-radius: 13px;
+}
+.stat-icon {
+  font-size: 1.7rem;
+  margin-bottom: 6px;
+}
+.stat-label {
+  font-size: 0.98rem;
+  margin-bottom: 4px;
+}
+.stat-value {
+  font-size: 1.25rem;
+  margin-top: 0;
+}
+.dashboard-chart-section {
+  padding: 16px 14px 10px 14px;
+  margin-top: 18px;
+  border-radius: 13px;
+}
+.dashboard-chart-section h3 {
+  font-size: 1.08rem;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+#dashboardChart {
+  height: 60px!important;
+  max-height: 80px;
+}
+@media (min-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .dashboard-chart-section {
+    padding: 8px 4px 6px 4px;
+  }
+}
+@media (max-width: 700px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
 }
