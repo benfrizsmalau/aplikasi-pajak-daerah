@@ -56,6 +56,17 @@ async function initTambahWpPage() {
             option.dataset.kodekec = item.KodeKecamatan;
             kelurahanSelect.appendChild(option);
         });
+        // Inisialisasi Choices.js setelah kelurahan terisi
+        if (window.Choices) {
+            new Choices(kelurahanSelect, {
+                searchEnabled: true,
+                searchPlaceholderValue: 'Cari di sini...',
+                itemSelectText: '',
+                shouldSort: false,
+                placeholder: true,
+                placeholderValue: 'Cari di sini...'
+            });
+        }
     } catch (error) {
         kelurahanSelect.innerHTML = '<option value="">Gagal memuat data</option>';
     }
