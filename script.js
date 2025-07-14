@@ -1,6 +1,6 @@
 // --- KONFIGURASI ---
-// Alamat backend di Netlify. Ini sudah benar dan tidak perlu diubah lagi.
-const webAppUrl = '/.netlify/functions/api';
+// Alamat backend di Netlify. Ini sudah final dan tidak perlu diubah.
+const apiUrl = '/.netlify/functions/api';
 // --------------------
 
 // Variabel global untuk menyimpan data
@@ -40,6 +40,10 @@ async function initTambahWpPage() {
     const form = document.getElementById('pajakForm');
     const kelurahanSelect = document.getElementById('kelurahan');
     const kecamatanInput = document.getElementById('kecamatan');
+    const generateCheckbox = document.getElementById('generateNpwpd');
+    const npwpdInput = document.getElementById('npwpd');
+    const jenisWpGroup = document.getElementById('jenisWpGroup');
+
     try {
         const data = await fetchAllData();
         dataWilayahGlobal = data.wilayah || [];
@@ -48,15 +52,36 @@ async function initTambahWpPage() {
             const option = document.createElement('option');
             option.value = item.Kelurahan;
             option.textContent = item.Kelurahan;
+            option.dataset.kodekel = item.KodeKelurahan;
+            option.dataset.kodekec = item.KodeKecamatan;
             kelurahanSelect.appendChild(option);
         });
     } catch (error) {
         kelurahanSelect.innerHTML = '<option value="">Gagal memuat data</option>';
     }
+
+    generateCheckbox.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            npwpdInput.readOnly = true;
+            npwpdInput.style.backgroundColor = '#e9ecef';
+            npwpdInput.value = '(Akan dibuat otomatis)';
+            npwpdInput.required = false;
+            jenisWpGroup.style.display = 'block';
+        } else {
+            npwpdInput.readOnly = false;
+            npwpdInput.style.backgroundColor = 'white';
+            npwpdInput.value = '';
+            npwpdInput.required = true;
+            npwpdInput.placeholder = 'Ketik NPWPD manual...';
+            jenisWpGroup.style.display = 'none';
+        }
+    });
+
     kelurahanSelect.addEventListener('change', (e) => {
         const wilayahCocok = dataWilayahGlobal.find(w => w.Kelurahan === e.target.value);
         kecamatanInput.value = wilayahCocok ? wilayahCocok.Kecamatan : '';
     });
+    
     form.addEventListener('submit', handleFormSubmit);
 }
 
@@ -148,22 +173,50 @@ async function handleFormSubmit(event) {
     const submitButton = document.getElementById('submitButton');
     const statusDiv = document.getElementById('status');
     submitButton.disabled = true; submitButton.textContent = 'Mengirim...'; statusDiv.style.display = 'none';
+    
+    const generateMode = document.getElementById('generateNpwpd').checked;
+    const kelurahanSelect = document.getElementById('kelurahan');
+    const selectedKelurahanOption = kelurahanSelect.options[kelurahanSelect.selectedIndex];
+
     try {
         const [fotoPemilik, fotoTempatUsaha, fotoKtp] = await Promise.all([
             fileToBase64(document.getElementById('fotoPemilik').files[0]),
             fileToBase64(document.getElementById('fotoTempatUsaha').files[0]),
             fileToBase64(document.getElementById('fotoKtp').files[0])
         ]);
-        const dataToSend = {
-            action: 'createWp', npwpd: document.getElementById('npwpd').value,
-            namaUsaha: document.getElementById('namaUsaha').value, namaPemilik: document.getElementById('namaPemilik').value,
-            nikKtp: document.getElementById('nikKtp').value, alamat: document.getElementById('alamat').value,
-            telephone: document.getElementById('telephone').value, kelurahan: document.getElementById('kelurahan').value,
-            kecamatan: document.getElementById('kecamatan').value, fotoPemilik, fotoTempatUsaha, fotoKtp
+
+        let dataToSend = {
+            action: 'createWp',
+            generate_mode: generateMode,
+            namaUsaha: document.getElementById('namaUsaha').value,
+            namaPemilik: document.getElementById('namaPemilik').value,
+            nikKtp: document.getElementById('nikKtp').value,
+            alamat: document.getElementById('alamat').value,
+            telephone: document.getElementById('telephone').value,
+            kelurahan: kelurahanSelect.value,
+            kecamatan: document.getElementById('kecamatan').value,
+            fotoPemilik, fotoTempatUsaha, fotoKtp
         };
+
+        if (generateMode) {
+            dataToSend.jenisWp = document.getElementById('jenisWp').value;
+            dataToSend.kodeKelurahan = selectedKelurahanOption.dataset.kodekel;
+            dataToSend.kodeKecamatan = selectedKelurahanOption.dataset.kodekec;
+        } else {
+            dataToSend.npwpd = document.getElementById('npwpd').value;
+            dataToSend.jenisWp = "Lama";
+        }
+        
         const result = await postData(dataToSend);
         showStatus(result.message || 'Data WP berhasil dibuat!', true);
-        event.target.reset(); document.getElementById('kecamatan').value = '';
+        event.target.reset(); 
+        document.getElementById('kecamatan').value = '';
+        document.getElementById('generateNpwpd').checked = false;
+        document.getElementById('npwpd').readOnly = false;
+        document.getElementById('npwpd').style.backgroundColor = 'white';
+        document.getElementById('npwpd').value = '';
+        document.getElementById('jenisWpGroup').style.display = 'none';
+
     } catch (error) {
         showStatus('Gagal mengirim data: ' + error.message, false);
     } finally {
@@ -287,7 +340,7 @@ async function handleUpdateKetetapanSubmit(event) {
         document.getElementById('editKetetapanModal').style.display = 'none';
         location.reload();
     } catch (error) {
-        alert('Gagal memperbarui ketetapan: ' + error.message);
+        alert('Gagal memperbarui data: ' + error.message);
     } finally {
         updateButton.disabled = false; updateButton.textContent = 'Simpan Perubahan';
     }
@@ -307,16 +360,21 @@ function showStatus(message, isSuccess, elementId = 'status') {
 }
 
 async function postData(data) {
-    const response = await fetch(webAppUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    const result = await response.json();
-    if (result.status === 'gagal' || !response.ok) {
-        throw new Error(result.message || `HTTP error! status: ${response.status}`);
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) {
+            const errorResult = await response.json();
+            throw new Error(errorResult.message || `HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Post error:', error);
+        throw error;
     }
-    return result;
 }
 
 function setupWpEditModal() {
@@ -340,7 +398,7 @@ function setupKetetapanEditModal() {
 }
 
 async function fetchAllData() {
-    const response = await fetch(webAppUrl);
+    const response = await fetch(apiUrl);
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Gagal mengambil data dari server. Status: ${response.status}. Pesan: ${errorText}`);
@@ -425,13 +483,11 @@ function displayKetetapanHistory(riwayatData) {
             });
             const idKetetapan = rowData['ID_Ketetapan'];
             const aksiCell = document.createElement('td');
-            // --- PERUBAHAN FINAL ADA DI SINI ---
             aksiCell.innerHTML = `
-                <a href="cetak-skpd.html?id=${idKetetapan}" target="_blank" class="btn-aksi" style="background-color: #007bff; text-decoration: none; display: inline-block;">Cetak</a>
+                <a href="cetak-skpd.html?id=${idKetetapan}" target="_blank" class="btn-aksi" style="background-color: #007bff; text-decoration: none; display: inline-block; margin-right: 5px;">Cetak</a>
                 <button class="btn-aksi btn-edit" onclick="handleEditKetetapanClick('${idKetetapan}')">Edit</button>
                 <button class="btn-aksi btn-hapus" onclick="handleDeleteKetetapanClick('${idKetetapan}')">Hapus</button>
             `;
-            // -------------------------------------
             row.appendChild(aksiCell);
             tableBody.appendChild(row);
         });

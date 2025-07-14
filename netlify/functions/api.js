@@ -45,7 +45,6 @@ exports.handler = async (event) => {
             }
             return { statusCode: 200, headers, body: JSON.stringify({ status: 'sukses', ...resultMessage }) };
         }
-
     } catch (error) {
         return { statusCode: 500, headers, body: JSON.stringify({ status: 'gagal', message: error.message }) };
     }
@@ -56,27 +55,50 @@ exports.handler = async (event) => {
 // =================================================================
 
 async function handleGet(sheets) {
-    const ranges = [WP_SHEET_NAME, WILAYAH_SHEET_NAME, MASTER_PAJAK_SHEET_NAME, KETETAPAN_SHEET_NAME];
+    const ranges = [WP_SHEET_NAME, WILAYAH_SHEET_NAME, MASTER_PAJAK_SHEET_NAME, KETETAPAN_SHEET_NAME, PEMBAYARAN_SHEET_NAME];
     const response = await sheets.spreadsheets.values.batchGet({ spreadsheetId: SPREADSHEET_ID, ranges });
     return {
         wajibPajak: formatSheetData(response.data.valueRanges[0].values),
         wilayah: formatSheetData(response.data.valueRanges[1].values),
         masterPajak: formatSheetData(response.data.valueRanges[2].values),
         ketetapan: formatSheetData(response.data.valueRanges[3].values),
+        pembayaran: formatSheetData(response.data.valueRanges[4].values),
     };
 }
 
 async function handleCreateWp(auth, sheets, data) {
+    const wpSheetData = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${WP_SHEET_NAME}!A:A` });
+    const allNpwpd = (wpSheetData.data.values || []).flat();
+    let newNpwpd;
+    let jenisWp = data.jenisWp;
+
+    if (data.generate_mode === true) {
+        const lastRow = allNpwpd.length;
+        const nextSequence = (lastRow).toString().padStart(6, '0');
+        newNpwpd = `P.${data.jenisWp}.${nextSequence}.${data.kodeKecamatan}.${data.kodeKelurahan}`;
+    } else {
+        newNpwpd = data.npwpd;
+        if (allNpwpd.includes(newNpwpd)) throw new Error(`NPWPD ${newNpwpd} sudah terdaftar.`);
+    }
+
     const drive = google.drive({ version: 'v3', auth });
-    async function uploadFile(base64Data, fileName) { /* ... kode sama ... */ }
     const [urlFotoPemilik, urlFotoUsaha, urlFotoKtp] = await Promise.all([
-        uploadFile(data.fotoPemilik, `pemilik_${data.npwpd}`),
-        uploadFile(data.fotoTempatUsaha, `usaha_${data.npwpd}`),
-        uploadFile(data.fotoKtp, `ktp_${data.npwpd}`)
+        uploadFile(drive, data.fotoPemilik, `pemilik_${newNpwpd}`),
+        uploadFile(drive, data.fotoTempatUsaha, `usaha_${newNpwpd}`),
+        uploadFile(drive, data.fotoKtp, `ktp_${newNpwpd}`)
     ]);
-    const newRow = [[ data.npwpd, data.namaUsaha, data.namaPemilik, data.nikKtp, data.alamat, data.telephone, data.kelurahan, data.kecamatan, urlFotoPemilik, urlFotoUsaha, urlFotoKtp ]];
-    await sheets.spreadsheets.values.append({ spreadsheetId: SPREADSHEET_ID, range: WP_SHEET_NAME, valueInputOption: 'USER_ENTERED', resource: { values: newRow }, });
-    return { message: "Data WP baru berhasil dibuat" };
+    
+    const newRow = [[
+        newNpwpd, jenisWp, data.namaUsaha, data.namaPemilik, data.nikKtp, data.alamat, 
+        data.telephone, data.kelurahan, data.kecamatan, 
+        urlFotoPemilik, urlFotoUsaha, urlFotoKtp
+    ]];
+
+    await sheets.spreadsheets.values.append({
+        spreadsheetId: SPREADSHEET_ID, range: WP_SHEET_NAME,
+        valueInputOption: 'USER_ENTERED', resource: { values: newRow },
+    });
+    return { message: `Data WP dengan NPWPD ${newNpwpd} berhasil dibuat.` };
 }
 
 async function handleUpdateWp(sheets, data) {
@@ -84,8 +106,8 @@ async function handleUpdateWp(sheets, data) {
     const allData = response.data.values; let rowIndex = -1;
     for (let i = 1; i < allData.length; i++) { if (allData[i][0] == data.npwpd) { rowIndex = i + 1; break; } }
     if (rowIndex === -1) throw new Error("NPWPD untuk update tidak ditemukan.");
-    const updatedRow = [ data.npwpd, data.namaUsaha, data.namaPemilik, data.nikKtp, data.alamat, data.telephone, data.kelurahan, data.kecamatan ];
-    await sheets.spreadsheets.values.update({ spreadsheetId: SPREADSHEET_ID, range: `${WP_SHEET_NAME}!A${rowIndex}:H${rowIndex}`, valueInputOption: 'USER_ENTERED', resource: { values: [updatedRow] }, });
+    const updatedRow = [ data.npwpd, data.jenisWp, data.namaUsaha, data.namaPemilik, data.nikKtp, data.alamat, data.telephone, data.kelurahan, data.kecamatan ];
+    await sheets.spreadsheets.values.update({ spreadsheetId: SPREADSHEET_ID, range: `${WP_SHEET_NAME}!A${rowIndex}:I${rowIndex}`, valueInputOption: 'USER_ENTERED', resource: { values: [updatedRow] }, });
     return { message: "Data WP berhasil diperbarui" };
 }
 
@@ -110,7 +132,7 @@ async function handleCreateKetetapan(sheets, data) {
     const allKetetapan = ketetapanData.data.values || [];
     const allMaster = masterData.data.values || [];
     const lastRow = allKetetapan.length;
-    const nextIdNumber = (lastRow).toString().padStart(7, '0');
+    const nextIdNumber = (lastRow + 1).toString().padStart(7, '0');
     const layananInfo = allMaster.find(row => row[0] === data.kodeLayanan);
     if (!layananInfo) throw new Error("Kode Layanan tidak valid.");
     const tipeLayanan = layananInfo[2] === 'Pajak' ? 'SKPD' : 'SKRD';
@@ -159,7 +181,6 @@ async function handleDeleteKetetapan(sheets, data) {
     return { message: "Ketetapan berhasil dihapus." };
 }
 
-// FUNGSI BARU UNTUK UPDATE KETETAPAN
 async function handleUpdateKetetapan(sheets, data) {
     const ketetapanData = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: KETETAPAN_SHEET_NAME });
     const allData = ketetapanData.data.values;
@@ -170,21 +191,15 @@ async function handleUpdateKetetapan(sheets, data) {
         }
     }
     if (rowIndex === -1) throw new Error("ID Ketetapan untuk update tidak ditemukan.");
-
     const today = new Date();
     const tanggalKetetapanLama = new Date(oldDataRow[4]);
     const jumlahPokokBaru = parseFloat(data.jumlahPokok);
-    let denda = parseFloat(oldDataRow[6]); // Gunakan denda lama by default
-
-    // Hitung ulang denda hanya jika jumlah pokok berubah
-    if (jumlahPokokBaru !== parseFloat(oldDataRow[5])) {
-      const selisihBulan = (today.getFullYear() - tanggalKetetapanLama.getFullYear()) * 12 + (today.getMonth() - tanggalKetetapanLama.getMonth());
-      if (selisihBulan > 0) {
+    let denda = parseFloat(oldDataRow[6]);
+    const selisihBulan = (today.getFullYear() - tanggalKetetapanLama.getFullYear()) * 12 + (today.getMonth() - tanggalKetetapanLama.getMonth());
+    if (selisihBulan > 0) {
         denda = selisihBulan * 0.02 * jumlahPokokBaru;
-      }
     }
     const totalTagihanBaru = jumlahPokokBaru + denda;
-
     const updatedRowValues = [
         oldDataRow[0], oldDataRow[1], oldDataRow[2], data.masaPajak, oldDataRow[4],
         jumlahPokokBaru, denda, totalTagihanBaru, oldDataRow[8], data.catatan || oldDataRow[9]
@@ -196,16 +211,20 @@ async function handleUpdateKetetapan(sheets, data) {
     return { message: "Ketetapan berhasil diperbarui" };
 }
 
+// =================================================================
+// Fungsi-fungsi Pembantu (Helpers)
+// =================================================================
 
-// --- Fungsi Pembantu ---
 function formatSheetData(values) {
     if (!values || values.length <= 1) return [];
     const headers = values.shift();
     return values.map(row => { let obj = {}; headers.forEach((header, index) => { obj[header] = row[index] || ""; }); return obj; });
 }
-async function handleCreateWp_uploadFile(base64Data, fileName, drive) { // Helper for createWp
+
+async function uploadFile(drive, base64Data, fileName) {
     if (!base64Data) return "";
-    const splitData = base64Data.split(","); const contentType = splitData[0].match(/:(.*?);/)[1];
+    const splitData = base64Data.split(",");
+    const contentType = splitData[0].match(/:(.*?);/)[1];
     const decodedData = Buffer.from(splitData[1], 'base64');
     const fileMetadata = { name: fileName, parents: [FOLDER_ID] };
     const media = { mimeType: contentType, body: require('stream').Readable.from(decodedData) };

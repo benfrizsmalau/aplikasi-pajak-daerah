@@ -21,11 +21,25 @@
     <main class="container">
         <h2>📝 Formulir Pendataan Wajib Pajak</h2>
         <form id="pajakForm">
+            <div class="form-group full-width" style="flex-direction: row; align-items: center; gap: 10px;">
+                <input type="checkbox" id="generateNpwpd" style="width: auto;">
+                <label for="generateNpwpd" style="margin: 0;">Buat NPWPD Otomatis (untuk Wajib Pajak Baru)</label>
+            </div>
+            
             <div class="form-grid">
                 <div class="form-group">
                     <label for="npwpd">NPWPD</label>
-                    <input type="text" id="npwpd" required>
+                    <input type="text" id="npwpd" required placeholder="Ketik NPWPD manual...">
                 </div>
+
+                <div class="form-group" id="jenisWpGroup" style="display: none;">
+                    <label for="jenisWp">Jenis Wajib Pajak</label>
+                    <select id="jenisWp">
+                        <option value="1">Pribadi</option>
+                        <option value="2">Badan Usaha</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="namaUsaha">Nama Usaha</label>
                     <input type="text" id="namaUsaha" required>
