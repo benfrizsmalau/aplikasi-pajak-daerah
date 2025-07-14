@@ -42,6 +42,7 @@ exports.handler = async (event) => {
                 case 'deleteKetetapan': resultMessage = await handleDeleteKetetapan(sheets, body); break;
                 case 'updateKetetapan': resultMessage = await handleUpdateKetetapan(sheets, body); break;
                 case 'createPembayaran': resultMessage = await handleCreatePembayaran(sheets, body); break;
+                case 'deletePembayaran': resultMessage = await handleDeletePembayaran(sheets, body); break;
                 default: throw new Error(`Aksi '${body.action}' tidak dikenali`);
             }
             return { statusCode: 200, headers, body: JSON.stringify({ status: 'sukses', ...resultMessage }) };
@@ -248,6 +249,37 @@ async function handleCreatePembayaran(sheets, data) {
         await sheets.spreadsheets.values.update({ spreadsheetId: SPREADSHEET_ID, range: `${KETETAPAN_SHEET_NAME}!I${rowIndex}`, valueInputOption: 'USER_ENTERED', resource: { values: [["Lunas"]] } });
     }
     return { message: "Pembayaran berhasil dicatat." };
+}
+
+// Tambahkan handler deletePembayaran
+async function handleDeletePembayaran(sheets, data) {
+    const pembayaranSheetData = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: PEMBAYARAN_SHEET_NAME });
+    const allData = pembayaranSheetData.data.values;
+    let rowIndex = -1;
+    for (let i = 1; i < allData.length; i++) {
+        if (allData[i][0] == data.id_pembayaran) { rowIndex = i; break; }
+    }
+    if (rowIndex === -1) throw new Error("ID Pembayaran untuk dihapus tidak ditemukan.");
+    const sheetMetadata = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID, ranges: [PEMBAYARAN_SHEET_NAME], fields: 'sheets(properties(sheetId,title))' });
+    const sheetInfo = sheetMetadata.data.sheets.find(s => s.properties.title === PEMBAYARAN_SHEET_NAME);
+    if (!sheetInfo) throw new Error("Gagal menemukan metadata sheet.");
+    const sheetId = sheetInfo.properties.sheetId;
+    await sheets.spreadsheets.batchUpdate({
+        spreadsheetId: SPREADSHEET_ID,
+        resource: {
+            requests: [{
+                deleteDimension: {
+                    range: {
+                        sheetId: sheetId,
+                        dimension: "ROWS",
+                        startIndex: rowIndex,
+                        endIndex: rowIndex + 1
+                    }
+                }
+            }]
+        }
+    });
+    return { message: "Pembayaran berhasil dihapus." };
 }
 
 // =================================================================
