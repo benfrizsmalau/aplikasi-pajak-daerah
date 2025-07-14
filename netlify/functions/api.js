@@ -219,8 +219,20 @@ async function handleCreatePembayaran(sheets, data) {
     const pembayaranData = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: PEMBAYARAN_SHEET_NAME });
     const allPembayaran = pembayaranData.data.values || [];
     const newPembayaranId = `PAY-${(allPembayaran.length).toString().padStart(7, '0')}`;
-    const newRow = [[ newPembayaranId, data.id_ketetapan, new Date(data.tanggalBayar).toISOString(), parseFloat(data.jumlahBayar), data.metodeBayar ]];
+    // Susun data sesuai urutan kolom worksheet terbaru
+    const newRow = [[
+        newPembayaranId,                // ID_Pembayaran
+        data.id_ketetapan,              // ID_Ketetapan
+        data.npwpd,                     // NPWPD
+        data.tanggalBayar,              // TanggalBayar
+        data.jumlahBayar,               // JumlahBayar
+        data.metodeBayar,               // MetodeBayar
+        data.waktuInput,                // WaktuInput
+        data.operator,                  // Operator
+        data.statusPembayaran           // StatusPembayaran
+    ]];
     await sheets.spreadsheets.values.append({ spreadsheetId: SPREADSHEET_ID, range: PEMBAYARAN_SHEET_NAME, valueInputOption: 'USER_ENTERED', resource: { values: newRow } });
+    // Update status ketetapan jika sudah lunas (kode lama tetap, tidak diubah)
     const ketetapanData = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: KETETAPAN_SHEET_NAME });
     const allKetetapan = ketetapanData.data.values; let rowIndex = -1; let totalTagihan = 0;
     for (let i = 1; i < allKetetapan.length; i++) {
@@ -231,7 +243,7 @@ async function handleCreatePembayaran(sheets, data) {
     if (rowIndex === -1) throw new Error("ID Ketetapan tidak ditemukan untuk update status.");
     const pembayaranUntukKetetapanIni = (await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: PEMBAYARAN_SHEET_NAME })).data.values || [];
     let totalSudahDibayar = 0;
-    pembayaranUntukKetetapanIni.forEach(row => { if (row[1] == data.id_ketetapan) totalSudahDibayar += parseFloat(row[3]); });
+    pembayaranUntukKetetapanIni.forEach(row => { if (row[1] == data.id_ketetapan) totalSudahDibayar += parseFloat(row[4]); });
     if (totalSudahDibayar >= totalTagihan) {
         await sheets.spreadsheets.values.update({ spreadsheetId: SPREADSHEET_ID, range: `${KETETAPAN_SHEET_NAME}!I${rowIndex}`, valueInputOption: 'USER_ENTERED', resource: { values: [["Lunas"]] } });
     }
