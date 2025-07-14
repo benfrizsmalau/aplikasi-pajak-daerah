@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setoran Pajak - Aplikasi Pajak Daerah</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="page-setoran-pajak">
+
+    <header class="main-header">
+        <h1>Aplikasi Pajak Daerah</h1>
+        <nav>
+            <a href="index.html">Dasbor</a>
+            <a href="tambah-data.html">Tambah Data WP</a>
+            <a href="lihat-data.html">Lihat Data WP</a>
+            <a href="tambah-ketetapan.html">Buat Ketetapan</a>
+            <a href="setoran-pajak.html" class="active">Setoran Pajak</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>Form Setoran Pajak</h2>
+        <p>Halaman ini akan digunakan untuk mencatat setoran pajak secara otomatis berdasarkan ketetapan yang sudah ada.</p>
+        <form id="formSetoranPajak">
+            <div class="form-group">
+                <label for="npwpdSelect">Pilih NPWPD</label>
+                <select id="npwpdSelect" required>
+                    <option value="">-- Pilih NPWPD --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ketetapanSelect">Pilih Ketetapan (Belum Lunas)</label>
+                <select id="ketetapanSelect" required disabled>
+                    <option value="">-- Pilih Ketetapan --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Nama Usaha</label>
+                <input type="text" id="namaUsaha" readonly>
+            </div>
+            <div class="form-group">
+                <label>Masa Pajak</label>
+                <input type="text" id="masaPajak" readonly>
+            </div>
+            <div class="form-group">
+                <label>Jumlah Tagihan</label>
+                <input type="text" id="jumlahTagihan" readonly>
+            </div>
+            <div class="form-group">
+                <label for="tanggalBayar">Tanggal Bayar</label>
+                <input type="date" id="tanggalBayar" required>
+            </div>
+            <div class="form-group">
+                <label for="jumlahBayar">Jumlah Bayar</label>
+                <input type="number" id="jumlahBayar" required min="0">
+            </div>
+            <div class="form-group">
+                <label for="metodeBayar">Metode Bayar</label>
+                <select id="metodeBayar" required>
+                    <option value="">-- Pilih Metode --</option>
+                    <option value="Tunai">Tunai</option>
+                    <option value="Transfer">Transfer</option>
+                </select>
+            </div>
+            <button type="submit">Simpan Setoran</button>
+            <div id="statusSetoran"></div>
+        </form>
+    </main>
+    
+</body>
+</html> 
