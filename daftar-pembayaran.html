@@ -23,7 +23,60 @@
     <main class="container">
         <h2>Daftar Pembayaran</h2>
         <p>Halaman ini akan menampilkan daftar pembayaran yang sudah dilakukan dan fitur cetak bukti bayar (SSPD/SSRD).</p>
+        <table id="tabelPembayaran" class="data-table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>ID Pembayaran</th>
+                    <th>ID Ketetapan</th>
+                    <th>NPWPD</th>
+                    <th>Tanggal Bayar</th>
+                    <th>Jumlah Bayar</th>
+                    <th>Metode</th>
+                    <th>Operator</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="10">Memuat data...</td></tr>
+            </tbody>
+        </table>
     </main>
+    <script>
+    const apiUrl = '/.netlify/functions/api';
+    document.addEventListener('DOMContentLoaded', async () => {
+        const tabelBody = document.querySelector('#tabelPembayaran tbody');
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            const pembayaran = data.pembayaran || [];
+            if (pembayaran.length === 0) {
+                tabelBody.innerHTML = '<tr><td colspan="10">Belum ada data pembayaran.</td></tr>';
+                return;
+            }
+            tabelBody.innerHTML = '';
+            pembayaran.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td>${row.ID_Pembayaran || ''}</td>
+                    <td>${row.ID_Ketetapan || ''}</td>
+                    <td>${row.NPWPD || ''}</td>
+                    <td>${row.TanggalBayar || ''}</td>
+                    <td>${row.JumlahBayar || ''}</td>
+                    <td>${row.MetodeBayar || ''}</td>
+                    <td>${row.Operator || ''}</td>
+                    <td>${row.StatusPembayaran || ''}</td>
+                    <td><button class="btn-print" data-id="${row.ID_Pembayaran}">Print Bukti Bayar</button></td>
+                `;
+                tabelBody.appendChild(tr);
+            });
+        } catch (err) {
+            tabelBody.innerHTML = '<tr><td colspan="10">Gagal memuat data pembayaran.</td></tr>';
+        }
+    });
+    </script>
     
 </body>
 </html> 
