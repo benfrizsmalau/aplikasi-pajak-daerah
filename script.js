@@ -1,5 +1,3 @@
-// File: script.js (Final untuk backend Netlify)
-
 // --- KONFIGURASI ---
 // Alamat backend di Netlify. Ini sudah benar dan tidak perlu diubah lagi.
 const webAppUrl = '/.netlify/functions/api';
@@ -263,7 +261,7 @@ async function handleDeleteKetetapanClick(idKetetapan) {
     }
 }
 
-async function handleEditKetetapanClick(idKetetapan) {
+function handleEditKetetapanClick(idKetetapan) {
     const dataToEdit = dataKetetapanGlobal.find(item => item.ID_Ketetapan == idKetetapan);
     if (!dataToEdit) { alert('Data ketetapan tidak ditemukan!'); return; }
     document.getElementById('editKetetapanId').value = dataToEdit.ID_Ketetapan;
@@ -289,7 +287,7 @@ async function handleUpdateKetetapanSubmit(event) {
         document.getElementById('editKetetapanModal').style.display = 'none';
         location.reload();
     } catch (error) {
-        alert('Gagal memperbarui data: ' + error.message);
+        alert('Gagal memperbarui ketetapan: ' + error.message);
     } finally {
         updateButton.disabled = false; updateButton.textContent = 'Simpan Perubahan';
     }
@@ -299,6 +297,7 @@ async function handleUpdateKetetapanSubmit(event) {
 // =================================================================
 // Fungsi-fungsi Pembantu (Helpers)
 // =================================================================
+
 function showStatus(message, isSuccess, elementId = 'status') {
     const statusDiv = document.getElementById(elementId);
     if (!statusDiv) return;
@@ -378,7 +377,7 @@ function populateDataTable(wajibPajakData) {
             });
             const npwpd = rowData['NPWPD'];
             const aksiCell = document.createElement('td');
-            aksiCell.innerHTML = `<button class="btn-aksi btn-edit" onclick="handleEditWpClick('${npwpd}')">Edit</button> <button class="btn-aksi btn-hapus" onclick="handleDeleteClick('${npwpd}')">Hapus</button>`;
+            aksiCell.innerHTML = `<button class="btn-aksi btn-edit" onclick="handleEditClick('${npwpd}')">Edit</button> <button class="btn-aksi btn-hapus" onclick="handleDeleteClick('${npwpd}')">Hapus</button>`;
             row.appendChild(aksiCell);
             tableBody.appendChild(row);
         });
@@ -426,10 +425,13 @@ function displayKetetapanHistory(riwayatData) {
             });
             const idKetetapan = rowData['ID_Ketetapan'];
             const aksiCell = document.createElement('td');
+            // --- PERUBAHAN FINAL ADA DI SINI ---
             aksiCell.innerHTML = `
+                <a href="cetak-skpd.html?id=${idKetetapan}" target="_blank" class="btn-aksi" style="background-color: #007bff; text-decoration: none; display: inline-block;">Cetak</a>
                 <button class="btn-aksi btn-edit" onclick="handleEditKetetapanClick('${idKetetapan}')">Edit</button>
                 <button class="btn-aksi btn-hapus" onclick="handleDeleteKetetapanClick('${idKetetapan}')">Hapus</button>
             `;
+            // -------------------------------------
             row.appendChild(aksiCell);
             tableBody.appendChild(row);
         });

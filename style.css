@@ -229,18 +229,99 @@ th {
     cursor: pointer;
 }
 
-/* Responsive */
+/* Halaman Cetak */
+.cetak-container {
+    width: 21cm;
+    min-height: 29.7cm;
+    padding: 2cm;
+    margin: 1cm auto;
+    border: 1px #D3D3D3 solid;
+    background: white;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+.skpd-header {
+    display: flex;
+    align-items: center;
+    border-bottom: 3px solid black;
+    padding-bottom: 10px;
+}
+.skpd-header .logo {
+    width: 80px;
+    height: auto;
+    margin-right: 20px;
+}
+.skpd-header .header-text {
+    text-align: center;
+    width: 100%;
+    line-height: 1.2;
+}
+.skpd-header .header-text p {
+    margin: 0;
+    font-weight: bold;
+    font-size: 14pt;
+}
+.skpd-body .judul {
+    text-align: center;
+    margin: 20px 0;
+}
+.skpd-body .judul h3, .skpd-body .judul p {
+    margin: 5px 0;
+}
+.info-wp {
+    width: 100%;
+    margin-bottom: 20px;
+}
+.rincian-biaya {
+    width: 100%;
+    border-collapse: collapse;
+}
+.rincian-biaya th, .rincian-biaya td {
+    border: 1px solid black;
+    padding: 8px;
+    vertical-align: top;
+}
+.terbilang {
+    margin-top: 20px;
+    font-style: italic;
+}
+.catatan-kaki {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+}
+.perhatian {
+    width: 60%;
+}
+.perhatian ol {
+    padding-left: 20px;
+    font-size: 10pt;
+}
+.signature-block {
+    width: 35%;
+    text-align: center;
+}
+.nama-pejabat {
+    font-weight: bold;
+    text-decoration: underline;
+    margin-top: 0;
+}
+.nip-pejabat {
+    margin-top: -15px;
+}
+.print-button-container {
+    text-align: center;
+    margin: 20px;
+}
+
+/* Responsive & Print */
 @media (max-width: 768px) {
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-    .detail-grid {
-        grid-template-columns: 1fr;
-    }
-    .main-header {
-        padding: 1rem;
-    }
-    .container {
-        padding: 0 1rem;
-    }
+    .form-grid { grid-template-columns: 1fr; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .main-header { padding: 1rem; }
+    .container { padding: 0 1rem; }
+}
+@media print {
+    body, .cetak-container { margin: 0; box-shadow: none; border: none; }
+    .print-button-container, .main-header { display: none; }
 }

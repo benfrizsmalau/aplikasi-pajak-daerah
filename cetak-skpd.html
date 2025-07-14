@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak SKPD</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="page-cetak">
+
+    <div class="cetak-container">
+        <header class="skpd-header">
+            <img src="images/logo.png" alt="Logo" class="logo">
+            
+            <div class="header-text">
+                <p>PEMERINTAH KABUPATEN MAMBERAMO RAYA</p>
+                <p>BADAN PENDAPATAN PENGELOLAAN</p>
+                <p>KEUANGAN DAN ASET DAERAH</p>
+            </div>
+        </header>
+
+        <main class="skpd-body">
+            <div class="judul">
+                <h3>SURAT KETETAPAN PAJAK/RETRIBUSI DAERAH</h4>
+                <p>(SKPD/SKRD)</p>
+                <p>Nomor: <span id="nomor-skpd">Memuat...</span></p>
+            </div>
+
+            <table class="info-wp">
+                <tr>
+                    <td>Nama Usaha</td>
+                    <td>: <span id="nama-usaha"></span></td>
+                </tr>
+                <tr>
+                    <td>Alamat</td>
+                    <td>: <span id="alamat-wp"></span></td>
+                </tr>
+                <tr>
+                    <td>NPWPD</td>
+                    <td>: <span id="npwpd"></span></td>
+                </tr>
+            </table>
+
+            <table class="rincian-biaya">
+                <thead>
+                    <tr>
+                        <th>NO</th>
+                        <th>AYAT</th>
+                        <th>JENIS PAJAK/RETRIBUSI DAERAH</th>
+                        <th>JUMLAH</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td id="ayat"></td>
+                        <td id="jenis-pajak"></td>
+                        <td id="jumlah-pokok"></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td colspan="2">Jumlah Sanksi</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td colspan="2">a. Bunga 2% / bulan</td>
+                        <td id="denda"></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td colspan="2">b. Kenaikan 100%</td>
+                        <td>Rp 0</td>
+                    </tr>
+                     <tr>
+                        <td>3</td>
+                        <td colspan="2"><strong>Jumlah keseluruhan</strong></td>
+                        <td><strong><span id="total-tagihan"></span></strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <p class="terbilang">
+                <strong>DENGAN HURUF:</strong> <span id="terbilang"></span>
+            </p>
+
+            <div class="catatan-kaki">
+                <div class="perhatian">
+                    <p><strong>PERHATIAN:</strong></p>
+                    <ol>
+                        <li>Harap penyetoran dilakukan melalui BKP atau Rekening PENERIMAAN KAB.MAMBERAMO RAYA BPD PAPUA, Cabang Kasonaweja: 111.01060.00221 dengan menggunakan Surat Ketetapan Pajak Daerah (SKPD)</li>
+                        <li>Apabila SKPD ini tidak atau kurang dibayar setelah lewat paling lama 30 hari sejak SKPD ini diterima dikenakan sanksi administrasi berupa bunga sebesar 2% per bulan.</li>
+                    </ol>
+                </div>
+                <div class="signature-block">
+                    <p>Burmeso, <span id="tanggal-surat"></span></p>
+                    <p>An. Kepala Badan Pendapatan<br>Pengelolaan Keuangaan dan Aset Daerah<br>Kabupaten Mamberamo Raya</p>
+                    <br><br><br>
+                    <p class="nama-pejabat">HERMAN TARIBABA.SE</p>
+                    <p class="nip-pejabat">NIP.197610202003121007</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="print-button-container">
+        <button onclick="window.print()">Cetak SKPD</button>
+    </div>
+
+    <script src="cetak.js"></script>
+</body>
+</html>
