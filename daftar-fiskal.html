@@ -24,7 +24,80 @@
     <main class="container">
         <h2>Daftar Dokumen Fiskal</h2>
         <p>Halaman ini akan menampilkan daftar NPWPD yang sudah memenuhi syarat untuk cetak dokumen fiskal.</p>
+        <table id="tabelFiskal" class="data-table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>NPWPD</th>
+                    <th>Nama Usaha</th>
+                    <th>Pajak Reklame</th>
+                    <th>Retribusi Persampahan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="6">Memuat data...</td></tr>
+            </tbody>
+        </table>
     </main>
-    
+    <script>
+    const apiUrl = '/.netlify/functions/api';
+    document.addEventListener('DOMContentLoaded', async () => {
+        const tabelBody = document.querySelector('#tabelFiskal tbody');
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            const pembayaran = data.pembayaran || [];
+            const ketetapan = data.ketetapan || [];
+            const master = data.masterPajak || [];
+            const wajibPajak = data.wajibPajak || [];
+            // Kelompokkan pembayaran per NPWPD
+            const npwpdMap = {};
+            pembayaran.forEach(row => {
+                if (!npwpdMap[row.NPWPD]) npwpdMap[row.NPWPD] = [];
+                npwpdMap[row.NPWPD].push(row);
+            });
+            const hasil = [];
+            Object.keys(npwpdMap).forEach(npwpd => {
+                // Cek pembayaran lunas Pajak Reklame dan Retribusi Persampahan
+                let lunasReklame = false;
+                let lunasSampah = false;
+                npwpdMap[npwpd].forEach(bayar => {
+                    // Temukan ketetapan terkait
+                    const ket = ketetapan.find(k => k.ID_Ketetapan === bayar.ID_Ketetapan);
+                    if (!ket) return;
+                    // Temukan master pajak terkait
+                    const m = master.find(m => m.KodeLayanan === ket.KodeLayanan);
+                    if (!m) return;
+                    if (m.NamaLayanan && m.NamaLayanan.toLowerCase().includes('reklame') && bayar.StatusPembayaran === 'Sukses') lunasReklame = true;
+                    if (m.NamaLayanan && m.NamaLayanan.toLowerCase().includes('sampah') && bayar.StatusPembayaran === 'Sukses') lunasSampah = true;
+                });
+                if (lunasReklame && lunasSampah) {
+                    const wp = wajibPajak.find(wp => wp.NPWPD === npwpd) || {};
+                    hasil.push({ npwpd, namaUsaha: wp['Nama Usaha'] || '-', lunasReklame, lunasSampah });
+                }
+            });
+            if (hasil.length === 0) {
+                tabelBody.innerHTML = '<tr><td colspan="6">Belum ada NPWPD yang memenuhi syarat cetak dokumen fiskal.</td></tr>';
+                return;
+            }
+            tabelBody.innerHTML = '';
+            hasil.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td>${row.npwpd}</td>
+                    <td>${row.namaUsaha}</td>
+                    <td style="color:green;font-weight:bold;">Lunas</td>
+                    <td style="color:green;font-weight:bold;">Lunas</td>
+                    <td><button class="btn-cetak-fiskal" data-npwpd="${row.npwpd}">Cetak Dokumen Fiskal</button></td>
+                `;
+                tabelBody.appendChild(tr);
+            });
+        } catch (err) {
+            tabelBody.innerHTML = '<tr><td colspan="6">Gagal memuat data.</td></tr>';
+        }
+    });
+    </script>
 </body>
 </html> 
