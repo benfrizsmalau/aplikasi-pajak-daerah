@@ -49,6 +49,7 @@
     let pembayaranDataGlobal = [];
     let wajibPajakDataGlobal = [];
     let masterPajakDataGlobal = [];
+    let ketetapanDataGlobal = [];
     document.addEventListener('DOMContentLoaded', async () => {
         const tabelBody = document.querySelector('#tabelPembayaran tbody');
         try {
@@ -58,6 +59,7 @@
             pembayaranDataGlobal = pembayaran;
             wajibPajakDataGlobal = data.wajibPajak || [];
             masterPajakDataGlobal = data.masterPajak || [];
+            ketetapanDataGlobal = data.ketetapan || [];
             if (pembayaran.length === 0) {
                 tabelBody.innerHTML = '<tr><td colspan="10">Belum ada data pembayaran.</td></tr>';
                 return;
@@ -102,17 +104,13 @@
         // Format nomor dokumen
         const bulanRomawi = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
         const tgl = new Date(); // tanggal print
-        const tglBayar = new Date(data.TanggalBayar);
         const nomorUrut = (data.ID_Pembayaran || '').replace(/[^0-9]/g, '').padStart(7, '0');
         const nomorDok = `${nomorUrut}/${jenis}/${bulanRomawi[tgl.getMonth()]}/${tgl.getFullYear()}`;
         // Data WP
         const wp = wajibPajakDataGlobal.find(wp => wp.NPWPD === data.NPWPD) || {};
         // Data Ketetapan
-        const idKetetapan = data.ID_Ketetapan || '';
-        // KodeLayanan dari ID_Ketetapan (format: .../kodeLayanan/...) atau dari data ketetapan jika tersedia
-        let kodeLayanan = '';
-        const ketetapanMatch = idKetetapan.split('/');
-        if (ketetapanMatch.length >= 2) kodeLayanan = ketetapanMatch[1];
+        const ketetapan = ketetapanDataGlobal.find(k => k.ID_Ketetapan === data.ID_Ketetapan) || {};
+        const kodeLayanan = ketetapan.KodeLayanan || '';
         // Data Master Pajak/Retri
         const master = masterPajakDataGlobal.find(m => m.KodeLayanan === kodeLayanan) || {};
         // Ayat = NomorRekening
@@ -157,7 +155,7 @@
                 <tr><td style="width:160px;">Nama Usaha</td><td>: ${wp['Nama Usaha'] || '-'}</td></tr>
                 <tr><td>Alamat</td><td>: ${wp.Alamat || '-'}</td></tr>
                 <tr><td>NPWPD</td><td>: ${data.NPWPD || '-'}</td></tr>
-                <tr><td>Menyetor Atas Dasar</td><td>: ${idKetetapan}</td></tr>
+                <tr><td>Menyetor Atas Dasar</td><td>: ${data.ID_Ketetapan || '-'}</td></tr>
             </table>
             <table border="1" style="border-collapse:collapse;width:100%;font-size:13px;margin-bottom:8px;">
                 <tr style="background:#f3f3f3;text-align:center;">
