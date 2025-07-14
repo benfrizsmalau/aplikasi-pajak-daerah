@@ -72,15 +72,24 @@
     // Konfigurasi API URL Netlify
     const apiUrl = '/.netlify/functions/api';
 
+    let dataWajibPajak = [];
+    let dataKetetapan = [];
+
     document.addEventListener('DOMContentLoaded', async () => {
         const npwpdSelect = document.getElementById('npwpdSelect');
+        const ketetapanSelect = document.getElementById('ketetapanSelect');
+        const namaUsahaInput = document.getElementById('namaUsaha');
+        const masaPajakInput = document.getElementById('masaPajak');
+        const jumlahTagihanInput = document.getElementById('jumlahTagihan');
+
         try {
             const response = await fetch(apiUrl);
             const data = await response.json();
-            const wajibPajakList = data.wajibPajak || [];
-            // Kosongkan dan tambahkan opsi default
+            dataWajibPajak = data.wajibPajak || [];
+            dataKetetapan = data.ketetapan || [];
+            // Isi NPWPD
             npwpdSelect.innerHTML = '<option value="">-- Pilih NPWPD --</option>';
-            wajibPajakList.forEach(wp => {
+            dataWajibPajak.forEach(wp => {
                 const option = document.createElement('option');
                 option.value = wp.NPWPD;
                 option.textContent = wp.NPWPD + ' - ' + (wp['Nama Usaha'] || '');
@@ -89,6 +98,38 @@
         } catch (error) {
             npwpdSelect.innerHTML = '<option value="">Gagal memuat data</option>';
         }
+
+        npwpdSelect.addEventListener('change', function() {
+            const selectedNpwpd = this.value;
+            // Reset field
+            ketetapanSelect.innerHTML = '<option value="">-- Pilih Ketetapan --</option>';
+            ketetapanSelect.disabled = true;
+            namaUsahaInput.value = '';
+            masaPajakInput.value = '';
+            jumlahTagihanInput.value = '';
+            if (!selectedNpwpd) return;
+            // Cari ketetapan yang belum lunas (pakai nama kolom sesuai sheet)
+            const ketetapanBelumLunas = dataKetetapan.filter(k => k.NPWPD === selectedNpwpd && k.Status === 'Belum Lunas');
+            if (ketetapanBelumLunas.length > 0) {
+                ketetapanSelect.disabled = false;
+                ketetapanBelumLunas.forEach(k => {
+                    const option = document.createElement('option');
+                    option.value = k.ID_Ketetapan;
+                    option.textContent = k.ID_Ketetapan + ' - ' + (k.MasaPajak || '') + ' - Tagihan: ' + (k.TotalTagihan || '');
+                    option.dataset.masaPajak = k.MasaPajak || '';
+                    option.dataset.jumlahTagihan = k.TotalTagihan || '';
+                    option.dataset.namaUsaha = (dataWajibPajak.find(wp => wp.NPWPD === selectedNpwpd)?.['Nama Usaha']) || '';
+                    ketetapanSelect.appendChild(option);
+                });
+            }
+        });
+
+        ketetapanSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            namaUsahaInput.value = selectedOption.dataset.namaUsaha || '';
+            masaPajakInput.value = selectedOption.dataset.masaPajak || '';
+            jumlahTagihanInput.value = selectedOption.dataset.jumlahTagihan || '';
+        });
     });
     </script>
 </body>
