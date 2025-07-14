@@ -31,13 +31,35 @@
 
     <div class="main-content">
         <h2>Selamat Datang di Dasbor</h2>
-        <p>Gunakan menu navigasi di atas untuk mengelola data wajib pajak.</p>
-        
-        <div class="summary-card">
-            <h3>Total Wajib Pajak Terdaftar</h3>
-            <div id="totalWp" class="summary-value">Memuat...</div>
+        <div class="dashboard-grid">
+            <div class="stat-card stat-blue">
+                <div class="stat-icon">👤</div>
+                <div class="stat-label">Jumlah WP</div>
+                <div class="stat-value" id="totalWp">123</div>
+            </div>
+            <div class="stat-card stat-green">
+                <div class="stat-icon">📄</div>
+                <div class="stat-label">Jumlah Ketetapan</div>
+                <div class="stat-value">45</div>
+            </div>
+            <div class="stat-card stat-orange">
+                <div class="stat-icon">💰</div>
+                <div class="stat-label">Sudah Setor</div>
+                <div class="stat-value">30</div>
+            </div>
+            <div class="stat-card stat-purple">
+                <div class="stat-icon">📝</div>
+                <div class="stat-label">SKPD/SKRD Terbit</div>
+                <div class="stat-value">20</div>
+            </div>
+            <div class="stat-card stat-pink">
+                <div class="stat-icon">🧾</div>
+                <div class="stat-label">SSPD/SSRD Terbit</div>
+                <div class="stat-value">15</div>
+            </div>
         </div>
-    </div> <!-- end main-content -->
+        <p style="margin-top: 32px;">Gunakan menu di samping untuk mengelola data wajib pajak dan fitur lainnya.</p>
+    </div>
     
     <script src="script.js"></script>
     <div class="watermark-footer">MADE BY REYNOLDS</div>
