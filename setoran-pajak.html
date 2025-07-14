@@ -68,5 +68,28 @@
         </form>
     </main>
     
+    <script>
+    // Konfigurasi API URL Netlify
+    const apiUrl = '/.netlify/functions/api';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const npwpdSelect = document.getElementById('npwpdSelect');
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            const wajibPajakList = data.wajibPajak || [];
+            // Kosongkan dan tambahkan opsi default
+            npwpdSelect.innerHTML = '<option value="">-- Pilih NPWPD --</option>';
+            wajibPajakList.forEach(wp => {
+                const option = document.createElement('option');
+                option.value = wp.NPWPD;
+                option.textContent = wp.NPWPD + ' - ' + (wp['Nama Usaha'] || '');
+                npwpdSelect.appendChild(option);
+            });
+        } catch (error) {
+            npwpdSelect.innerHTML = '<option value="">Gagal memuat data</option>';
+        }
+    });
+    </script>
 </body>
 </html> 
