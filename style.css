@@ -921,3 +921,42 @@ th {
     grid-template-columns: 1fr;
   }
 }
+
+/* Tambahan warna card statistik baru */
+.stat-teal {
+  background: linear-gradient(120deg, #009688 60%, #4dd0e1 100%);
+  color: #fff;
+}
+.stat-gold {
+  background: linear-gradient(120deg, #fbc02d 60%, #ffe082 100%);
+  color: #fff;
+}
+.stat-dark {
+  background: linear-gradient(120deg, #263238 60%, #90a4ae 100%);
+  color: #fff;
+}
+.dashboard-chart-section {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(60,60,120,0.10);
+  padding: 32px 32px 24px 32px;
+  margin-top: 36px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (min-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
