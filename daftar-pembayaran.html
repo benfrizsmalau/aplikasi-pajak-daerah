@@ -186,8 +186,10 @@
                     <b>${wp['Nama Usaha'] || '-'}</b>
                 </div>
             </div>
+            <div style="text-align:center;margin-top:32px;">
+                <button onclick="window.print()" style="padding:10px 24px;font-size:15px;cursor:pointer;">Cetak</button>
+            </div>
         </div>
-        <script>window.print();<\/script>
         `;
         // Tampilkan hanya di window baru, tidak di halaman utama
         const win = window.open('', '', 'width=900,height=1200');
