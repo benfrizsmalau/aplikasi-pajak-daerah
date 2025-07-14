@@ -77,7 +77,10 @@
                     <td>${row.MetodeBayar || ''}</td>
                     <td>${row.Operator || ''}</td>
                     <td>${row.StatusPembayaran || ''}</td>
-                    <td><button class="btn-print" data-id="${row.ID_Pembayaran}">Print Bukti Bayar</button></td>
+                    <td>
+                        <button class="btn-print" data-id="${row.ID_Pembayaran}">Print Bukti Bayar</button>
+                        <button class="btn-delete" data-id="${row.ID_Pembayaran}" style="background:#dc3545;color:#fff;margin-left:5px;">Delete</button>
+                    </td>
                 `;
                 tabelBody.appendChild(tr);
             });
@@ -85,13 +88,19 @@
             tabelBody.innerHTML = '<tr><td colspan="10">Gagal memuat data pembayaran.</td></tr>';
         }
 
-        // Event print
+        // Event print & delete
         tabelBody.addEventListener('click', function(e) {
             if (e.target.classList.contains('btn-print')) {
                 const idPembayaran = e.target.getAttribute('data-id');
                 const pembayaran = pembayaranDataGlobal.find(p => p.ID_Pembayaran === idPembayaran);
                 if (pembayaran) {
                     printBuktiBayar(pembayaran);
+                }
+            }
+            if (e.target.classList.contains('btn-delete')) {
+                const idPembayaran = e.target.getAttribute('data-id');
+                if (confirm('Yakin ingin menghapus pembayaran ini?')) {
+                    deletePembayaran(idPembayaran);
                 }
             }
         });
@@ -195,6 +204,25 @@
         const win = window.open('', '', 'width=900,height=1200');
         win.document.write('<html><head><title>Bukti Bayar</title><style>@media print {.btn-cetak-print{display:none!important;}}</style></head><body>' + html + '</body></html>');
         win.document.close();
+    }
+
+    async function deletePembayaran(idPembayaran) {
+        try {
+            const result = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'deletePembayaran', id_pembayaran: idPembayaran })
+            });
+            const resJson = await result.json();
+            if (resJson.status === 'sukses') {
+                alert('Pembayaran berhasil dihapus!');
+                location.reload();
+            } else {
+                alert(resJson.message || 'Gagal menghapus pembayaran!');
+            }
+        } catch (err) {
+            alert('Terjadi error saat menghapus pembayaran!');
+        }
     }
     </script>
     
