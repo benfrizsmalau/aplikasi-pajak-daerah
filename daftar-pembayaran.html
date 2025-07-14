@@ -187,13 +187,13 @@
                 </div>
             </div>
             <div style="text-align:center;margin-top:32px;">
-                <button onclick="window.print()" style="padding:10px 24px;font-size:15px;cursor:pointer;">Cetak</button>
+                <button class="btn-cetak-print" onclick="window.print()" style="padding:10px 24px;font-size:15px;cursor:pointer;">Cetak</button>
             </div>
         </div>
         `;
         // Tampilkan hanya di window baru, tidak di halaman utama
         const win = window.open('', '', 'width=900,height=1200');
-        win.document.write('<html><head><title>Bukti Bayar</title></head><body>' + html + '</body></html>');
+        win.document.write('<html><head><title>Bukti Bayar</title><style>@media print {.btn-cetak-print{display:none!important;}}</style></head><body>' + html + '</body></html>');
         win.document.close();
     }
     </script>
