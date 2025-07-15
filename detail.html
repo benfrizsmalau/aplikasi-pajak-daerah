@@ -8,47 +8,82 @@
 </head>
 <body id="page-detail-wp">
 
-    <header class="main-header">
-        <h1>Aplikasi Pajak Daerah</h1>
+    <div class="instansi-header">
+        <img src="images/logo.png" alt="Logo" class="instansi-logo">
+        <div class="instansi-text">
+            <div class="instansi-title">APLIKASI SISTEM INFORMASI PENDAPATAN DAERAH</div>
+            <div class="instansi-sub">BIDANG PENDAPATAN DAERAH</div>
+            <div class="instansi-sub2">BADAN PENDAPATAN PENGELOLAAN KEUANGAN DAN ASET DAERAH KABUPATEN MAMBERAMO RAYA</div>
+        </div>
+    </div>
+
+    <div class="sidebar-menu">
         <nav>
             <a href="index.html">Dasbor</a>
             <a href="tambah-data.html">Tambah Data WP</a>
             <a href="lihat-data.html">Lihat Data WP</a>
             <a href="tambah-ketetapan.html">Buat Ketetapan</a>
+            <a href="setoran-pajak.html">Setoran Pajak</a>
+            <a href="daftar-pembayaran.html">Daftar Pembayaran</a>
+            <a href="daftar-fiskal.html">Daftar Fiskal</a>
         </nav>
-    </header>
+    </div>
 
-    <main class="container">
-        <div class="detail-header">
-            <h2>📄 Detail Wajib Pajak</h2>
-            <div id="detailAksi">
+    <div class="main-content">
+        <main class="container">
+            <div class="content-header">
+                <h2>📄 Detail Wajib Pajak</h2>
+                <p>Informasi lengkap dan riwayat ketetapan pajak wajib pajak</p>
+            </div>
+
+            <div class="content-card">
+                <div id="detailAksi" class="action-buttons">
+                    <!-- Tombol aksi akan diisi oleh JavaScript -->
                 </div>
-        </div>
-        
-        <div id="detailContent" class="detail-card">
-            <div class="detail-ktp-layout">
-                <div class="detail-foto-ktp" id="detailFotoKtpSlot"></div>
-                <div class="detail-data-ktp" id="detailDataKtpSlot"></div>
+                
+                <div id="detailContent" class="detail-card">
+                    <div class="detail-ktp-layout">
+                        <div class="detail-foto-ktp" id="detailFotoKtpSlot"></div>
+                        <div class="detail-data-ktp" id="detailDataKtpSlot"></div>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <h3 style="margin-top: 2rem;">Galeri Foto</h3>
-        <div id="fotoContent" class="foto-grid">
+            
+            <div class="content-card">
+                <h3 style="margin-bottom: 1rem;">📸 Galeri Foto</h3>
+                <div id="fotoContent" class="foto-grid">
+                    <!-- Foto akan diisi oleh JavaScript -->
+                </div>
             </div>
 
-        <h3 style="margin-top: 2rem;">Riwayat Ketetapan Pajak</h3>
-        <div style="overflow-x:auto;">
-            <table id="ketetapanTable">
-                <thead>
-                    </thead>
-                <tbody>
-                    <tr><td colspan="11">Memuat riwayat...</td></tr>
-                </tbody>
-            </table>
-        </div>
+            <div class="content-card">
+                <h3 style="margin-bottom: 1rem;">📋 Riwayat Ketetapan Pajak</h3>
+                <div style="overflow-x:auto;">
+                    <table id="ketetapanTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>ID Ketetapan</th>
+                                <th>Masa Pajak</th>
+                                <th>Jenis Pajak</th>
+                                <th>Jumlah Pokok</th>
+                                <th>Denda</th>
+                                <th>Total Tagihan</th>
+                                <th>Status</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="10" style="text-align: center; padding: 20px; color: #666;">Memuat riwayat...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
 
-    </main>
-    
+    <!-- Modal Edit Ketetapan -->
     <div id="editKetetapanModal" class="modal">
         <div class="modal-content">
             <span class="close-button" id="closeKetetapanModal">&times;</span>
@@ -59,22 +94,31 @@
                     <div class="form-group">
                         <label for="editKetetapanMasaPajak">Masa Pajak</label>
                         <input type="text" id="editKetetapanMasaPajak" required>
+                        <small class="helper-text">Periode masa pajak yang dikenakan</small>
                     </div>
                     <div class="form-group">
                         <label for="editKetetapanJumlahPokok">Jumlah Pokok (Rp)</label>
                         <input type="number" id="editKetetapanJumlahPokok" required>
+                        <small class="helper-text">Jumlah pokok pajak yang harus dibayar</small>
                     </div>
                     <div class="form-group full-width">
                         <label for="editKetetapanCatatan">Catatan</label>
                         <input type="text" id="editKetetapanCatatan">
+                        <small class="helper-text">Catatan atau keterangan tambahan</small>
                     </div>
                 </div>
+                <div class="form-actions">
+                    <button type="submit" id="updateKetetapanButton" class="btn-primary">
+                        <span class="btn-icon">💾</span>
+                        Simpan Perubahan
+                    </button>
+                </div>
                 <p style="font-size: 0.9em; color: #666; margin-top: 1rem;">* Hanya Masa Pajak dan Jumlah Pokok yang bisa diubah. Denda akan dihitung ulang otomatis.</p>
-                <button type="submit" id="updateKetetapanButton">Simpan Perubahan</button>
             </form>
         </div>
     </div>
 
     <script src="script.js"></script>
+    <div class="watermark-footer">MADE BY REYNOLDS</div>
 </body>
 </html>
