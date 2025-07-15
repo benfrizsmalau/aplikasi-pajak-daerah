@@ -173,8 +173,18 @@ async function initDetailPage() {
         aksiContent.innerHTML = `<a href="tambah-ketetapan.html?npwpd=${npwpd}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 12px 24px; background: #1976d2; color: white; border-radius: 8px; font-weight: 500; transition: background 0.3s;"><span>📋</span>Buat Ketetapan Baru</a>`;
         displayDetailData(item);
         displayPhotos(item);
+        
+        // Load riwayat ketetapan
         const riwayatKetetapan = dataKetetapanGlobal.filter(k => k.NPWPD == npwpd);
-        displayKetetapanHistory(riwayatKetetapan);
+        displayKetetapanHistory(riwayatKetetapan, data.masterPajak || []);
+        
+        // Load riwayat pembayaran
+        const riwayatPembayaran = (data.pembayaran || []).filter(p => p.NPWPD == npwpd);
+        displayPembayaranHistory(riwayatPembayaran);
+        
+        // Load status fiskal
+        displayFiskalStatus(npwpd, data);
+        
         setupKetetapanEditModal();
     } catch (error) {
         detailContent.innerHTML = `<p style="color: red;">${error.message}</p>`;
@@ -557,4 +567,137 @@ function fileToBase64(file) {
         reader.onload = () => resolve(reader.result);
         reader.onerror = error => reject(error);
     });
+}
+
+// Fungsi untuk menampilkan riwayat ketetapan dengan nama layanan yang benar
+function displayKetetapanHistory(riwayatData, masterPajakData) {
+    const tbody = document.querySelector('#ketetapanTable tbody');
+    if (!tbody) return;
+    
+    if (riwayatData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 20px; color: #666;">Belum ada riwayat ketetapan.</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = '';
+    riwayatData.forEach((item, index) => {
+        // Cari nama layanan dari master pajak
+        const masterPajak = masterPajakData.find(mp => mp.KodeLayanan === item.KodeLayanan);
+        const namaLayanan = masterPajak ? masterPajak.NamaLayanan : item.KodeLayanan || '-';
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.ID_Ketetapan || '-'}</td>
+            <td>${item.MasaPajak || '-'}</td>
+            <td>${namaLayanan}</td>
+            <td>${formatRupiah(item.JumlahPokok)}</td>
+            <td>${formatRupiah(item.Denda)}</td>
+            <td>${formatRupiah(item.TotalTagihan)}</td>
+            <td>${item.Status || 'Aktif'}</td>
+            <td>${item.TanggalKetetapan ? new Date(item.TanggalKetetapan).toLocaleDateString('id-ID') : '-'}</td>
+            <td>
+                <button onclick="handleEditKetetapanClick('${item.ID_Ketetapan}')" style="background: #1976d2; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Edit</button>
+                <button onclick="handleDeleteKetetapanClick('${item.ID_Ketetapan}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-left: 4px;">Hapus</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Fungsi untuk menampilkan riwayat pembayaran
+function displayPembayaranHistory(riwayatData) {
+    const tbody = document.querySelector('#pembayaranTable tbody');
+    if (!tbody) return;
+    
+    if (riwayatData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px; color: #666;">Belum ada riwayat pembayaran.</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = '';
+    riwayatData.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.ID_Pembayaran || '-'}</td>
+            <td>${item.ID_Ketetapan || '-'}</td>
+            <td>${item.TanggalBayar ? new Date(item.TanggalBayar).toLocaleDateString('id-ID') : '-'}</td>
+            <td>${formatRupiah(item.JumlahBayar)}</td>
+            <td>${item.MetodeBayar || '-'}</td>
+            <td>${item.Operator || '-'}</td>
+            <td><span style="color: ${item.StatusPembayaran === 'Sukses' ? 'green' : 'red'}; font-weight: bold;">${item.StatusPembayaran || '-'}</span></td>
+            <td>
+                <button onclick="printBuktiBayar('${item.ID_Pembayaran}')" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Print</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Fungsi untuk menampilkan status fiskal
+function displayFiskalStatus(npwpd, data) {
+    const pembayaran = data.pembayaran || [];
+    const ketetapan = data.ketetapan || [];
+    const masterPajak = data.masterPajak || [];
+    
+    // Kelompokkan pembayaran per NPWPD
+    const pembayaranWP = pembayaran.filter(p => p.NPWPD === npwpd);
+    
+    let lunasReklame = false;
+    let lunasSampah = false;
+    
+    pembayaranWP.forEach(bayar => {
+        const ket = ketetapan.find(k => k.ID_Ketetapan === bayar.ID_Ketetapan);
+        if (!ket) return;
+        
+        const master = masterPajak.find(m => m.KodeLayanan === ket.KodeLayanan);
+        if (!master) return;
+        
+        if (master.NamaLayanan && master.NamaLayanan.toLowerCase().includes('reklame') && bayar.StatusPembayaran === 'Sukses') {
+            lunasReklame = true;
+        }
+        if (master.NamaLayanan && master.NamaLayanan.toLowerCase().includes('sampah') && bayar.StatusPembayaran === 'Sukses') {
+            lunasSampah = true;
+        }
+    });
+    
+    // Update status
+    document.getElementById('statusReklame').innerHTML = lunasReklame ? 
+        '<span style="color: green; font-weight: bold;">✅ Lunas</span>' : 
+        '<span style="color: red; font-weight: bold;">❌ Belum Lunas</span>';
+    
+    document.getElementById('statusSampah').innerHTML = lunasSampah ? 
+        '<span style="color: green; font-weight: bold;">✅ Lunas</span>' : 
+        '<span style="color: red; font-weight: bold;">❌ Belum Lunas</span>';
+    
+    const statusFiskal = lunasReklame && lunasSampah;
+    document.getElementById('statusFiskalOverall').innerHTML = statusFiskal ? 
+        '<span style="color: green; font-weight: bold;">✅ Memenuhi Syarat</span>' : 
+        '<span style="color: red; font-weight: bold;">❌ Belum Memenuhi Syarat</span>';
+    
+    // Hitung jatuh tempo fiskal (1 tahun dari pembayaran terakhir)
+    if (statusFiskal && pembayaranWP.length > 0) {
+        const pembayaranSukses = pembayaranWP.filter(p => p.StatusPembayaran === 'Sukses');
+        if (pembayaranSukses.length > 0) {
+            const pembayaranTerakhir = pembayaranSukses.sort((a, b) => new Date(b.TanggalBayar) - new Date(a.TanggalBayar))[0];
+            const tanggalBayar = new Date(pembayaranTerakhir.TanggalBayar);
+            const jatuhTempo = new Date(tanggalBayar.getFullYear() + 1, tanggalBayar.getMonth(), tanggalBayar.getDate());
+            document.getElementById('jatuhTempoFiskal').textContent = jatuhTempo.toLocaleDateString('id-ID');
+        } else {
+            document.getElementById('jatuhTempoFiskal').textContent = '-';
+        }
+    } else {
+        document.getElementById('jatuhTempoFiskal').textContent = '-';
+    }
+}
+
+// Fungsi helper untuk format rupiah
+function formatRupiah(angka) {
+    if (!angka) return 'Rp 0';
+    return new Intl.NumberFormat('id-ID', { 
+        style: 'currency', 
+        currency: 'IDR', 
+        minimumFractionDigits: 0 
+    }).format(angka);
 }

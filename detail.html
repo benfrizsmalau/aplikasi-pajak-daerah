@@ -37,14 +37,17 @@
             </div>
 
             <div class="content-card">
-                <div id="detailAksi" class="action-buttons">
-                    <!-- Tombol aksi akan diisi oleh JavaScript -->
-                </div>
-                
                 <div id="detailContent" class="detail-card">
                     <div class="detail-ktp-layout">
                         <div class="detail-foto-ktp" id="detailFotoKtpSlot"></div>
                         <div class="detail-data-ktp" id="detailDataKtpSlot"></div>
+                    </div>
+                </div>
+                
+                <!-- Tombol Aksi yang diperbaiki -->
+                <div class="action-buttons" style="margin-top: 20px; text-align: center;">
+                    <div id="detailAksi">
+                        <!-- Tombol aksi akan diisi oleh JavaScript -->
                     </div>
                 </div>
             </div>
@@ -53,6 +56,29 @@
                 <h3 style="margin-bottom: 1rem;">📸 Galeri Foto</h3>
                 <div id="fotoContent" class="foto-grid">
                     <!-- Foto akan diisi oleh JavaScript -->
+                </div>
+            </div>
+
+            <!-- Informasi Status Fiskal -->
+            <div class="content-card">
+                <h3 style="margin-bottom: 1rem;">📋 Status Fiskal</h3>
+                <div id="statusFiskal" class="fiskal-status">
+                    <div class="status-item">
+                        <span class="status-label">Pajak Reklame:</span>
+                        <span class="status-value" id="statusReklame">Memeriksa...</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Retribusi Persampahan:</span>
+                        <span class="status-value" id="statusSampah">Memeriksa...</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Status Fiskal:</span>
+                        <span class="status-value" id="statusFiskalOverall">Memeriksa...</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Jatuh Tempo Fiskal:</span>
+                        <span class="status-value" id="jatuhTempoFiskal">-</span>
+                    </div>
                 </div>
             </div>
 
@@ -76,6 +102,30 @@
                         </thead>
                         <tbody>
                             <tr><td colspan="10" style="text-align: center; padding: 20px; color: #666;">Memuat riwayat...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3 style="margin-bottom: 1rem;">💰 Riwayat Pembayaran</h3>
+                <div style="overflow-x:auto;">
+                    <table id="pembayaranTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>ID Pembayaran</th>
+                                <th>ID Ketetapan</th>
+                                <th>Tanggal Bayar</th>
+                                <th>Jumlah Bayar</th>
+                                <th>Metode Bayar</th>
+                                <th>Operator</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="9" style="text-align: center; padding: 20px; color: #666;">Memuat riwayat...</td></tr>
                         </tbody>
                     </table>
                 </div>

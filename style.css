@@ -1082,3 +1082,55 @@ th {
   margin-left: 4px;
   letter-spacing: 0.1px;
 }
+
+/* Status Fiskal Styling */
+.fiskal-status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.status-item {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #1976d2;
+}
+
+.status-label {
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.status-value {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Action Buttons Styling */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.action-buttons a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  padding: 12px 24px;
+  background: #1976d2;
+  color: white;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+.action-buttons a:hover {
+  background: #1565c0;
+}
