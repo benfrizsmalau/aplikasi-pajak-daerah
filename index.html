@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dasbor - Aplikasi Pajak Daerah</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body id="page-dashboard">
 
@@ -35,42 +36,42 @@
             <div class="stat-card stat-blue">
                 <div class="stat-icon">👤</div>
                 <div class="stat-label">Jumlah WP</div>
-                <div class="stat-value" id="totalWp">123</div>
+                <div class="stat-value" id="totalWp">Loading...</div>
             </div>
             <div class="stat-card stat-green">
                 <div class="stat-icon">📄</div>
                 <div class="stat-label">Jumlah Ketetapan</div>
-                <div class="stat-value">45</div>
+                <div class="stat-value" id="totalKetetapan">Loading...</div>
             </div>
             <div class="stat-card stat-orange">
                 <div class="stat-icon">💰</div>
                 <div class="stat-label">Sudah Setor</div>
-                <div class="stat-value">30</div>
+                <div class="stat-value" id="totalPembayaran">Loading...</div>
             </div>
             <div class="stat-card stat-purple">
                 <div class="stat-icon">📝</div>
                 <div class="stat-label">SKPD/SKRD Terbit</div>
-                <div class="stat-value">20</div>
+                <div class="stat-value" id="totalSkpdSkrd">Loading...</div>
             </div>
             <div class="stat-card stat-pink">
                 <div class="stat-icon">🧾</div>
                 <div class="stat-label">SSPD/SSRD Terbit</div>
-                <div class="stat-value">15</div>
+                <div class="stat-value" id="totalSspdSsrd">Loading...</div>
             </div>
             <div class="stat-card stat-teal">
                 <div class="stat-icon">📑</div>
                 <div class="stat-label">Fiskal Terbit</div>
-                <div class="stat-value">8</div>
+                <div class="stat-value" id="totalFiskal">Loading...</div>
             </div>
             <div class="stat-card stat-gold">
                 <div class="stat-icon">💵</div>
                 <div class="stat-label">Nilai Ketetapan (Total)</div>
-                <div class="stat-value">Rp 100.000.000</div>
+                <div class="stat-value" id="totalNilaiKetetapan">Loading...</div>
             </div>
             <div class="stat-card stat-dark">
                 <div class="stat-icon">💳</div>
                 <div class="stat-label">Nilai Setoran (Total)</div>
-                <div class="stat-value">Rp 80.000.000</div>
+                <div class="stat-value" id="totalNilaiSetoran">Loading...</div>
             </div>
         </div>
         <div class="dashboard-chart-section">
@@ -81,6 +82,158 @@
     </div>
     
     <script src="script.js"></script>
+    <script>
+    // Dashboard specific script
+    async function loadDashboardData() {
+        try {
+            const response = await fetch('/.netlify/functions/api');
+            const data = await response.json();
+            
+            // Update statistik
+            const wajibPajak = data.wajibPajak || [];
+            const ketetapan = data.ketetapan || [];
+            const pembayaran = data.pembayaran || [];
+            
+            // Hitung statistik
+            document.getElementById('totalWp').textContent = wajibPajak.length;
+            document.getElementById('totalKetetapan').textContent = ketetapan.length;
+            document.getElementById('totalPembayaran').textContent = pembayaran.length;
+            
+            // Hitung SKPD/SKRD (ketetapan yang sudah lunas)
+            const ketetapanLunas = ketetapan.filter(k => {
+                const pembayaranKetetapan = pembayaran.filter(p => p.ID_Ketetapan === k.ID_Ketetapan);
+                return pembayaranKetetapan.some(p => p.StatusPembayaran === 'Sukses');
+            });
+            document.getElementById('totalSkpdSkrd').textContent = ketetapanLunas.length;
+            
+            // Hitung SSPD/SSRD (pembayaran sukses)
+            const pembayaranSukses = pembayaran.filter(p => p.StatusPembayaran === 'Sukses');
+            document.getElementById('totalSspdSsrd').textContent = pembayaranSukses.length;
+            
+            // Hitung Fiskal (NPWPD yang sudah lunas reklame dan sampah)
+            const npwpdMap = {};
+            pembayaran.forEach(row => {
+                if (!npwpdMap[row.NPWPD]) npwpdMap[row.NPWPD] = [];
+                npwpdMap[row.NPWPD].push(row);
+            });
+            
+            let totalFiskal = 0;
+            Object.keys(npwpdMap).forEach(npwpd => {
+                let lunasReklame = false;
+                let lunasSampah = false;
+                npwpdMap[npwpd].forEach(bayar => {
+                    const ket = ketetapan.find(k => k.ID_Ketetapan === bayar.ID_Ketetapan);
+                    if (!ket) return;
+                    const master = data.masterPajak?.find(m => m.KodeLayanan === ket.KodeLayanan);
+                    if (!master) return;
+                    if (master.NamaLayanan && master.NamaLayanan.toLowerCase().includes('reklame') && bayar.StatusPembayaran === 'Sukses') lunasReklame = true;
+                    if (master.NamaLayanan && master.NamaLayanan.toLowerCase().includes('sampah') && bayar.StatusPembayaran === 'Sukses') lunasSampah = true;
+                });
+                if (lunasReklame && lunasSampah) totalFiskal++;
+            });
+            document.getElementById('totalFiskal').textContent = totalFiskal;
+            
+            // Hitung total nilai ketetapan
+            const totalNilaiKetetapan = ketetapan.reduce((sum, k) => {
+                return sum + (parseFloat(k.TotalTagihan) || 0);
+            }, 0);
+            document.getElementById('totalNilaiKetetapan').textContent = `Rp ${totalNilaiKetetapan.toLocaleString('id-ID')}`;
+            
+            // Hitung total nilai setoran
+            const totalNilaiSetoran = pembayaranSukses.reduce((sum, p) => {
+                return sum + (parseFloat(p.JumlahBayar) || 0);
+            }, 0);
+            document.getElementById('totalNilaiSetoran').textContent = `Rp ${totalNilaiSetoran.toLocaleString('id-ID')}`;
+            
+            // Update grafik per bulan
+            updateDashboardChart(ketetapan, pembayaran);
+            
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+            document.getElementById('totalWp').textContent = 'Error';
+            document.getElementById('totalKetetapan').textContent = 'Error';
+            document.getElementById('totalPembayaran').textContent = 'Error';
+            document.getElementById('totalSkpdSkrd').textContent = 'Error';
+            document.getElementById('totalSspdSsrd').textContent = 'Error';
+            document.getElementById('totalFiskal').textContent = 'Error';
+            document.getElementById('totalNilaiKetetapan').textContent = 'Error';
+            document.getElementById('totalNilaiSetoran').textContent = 'Error';
+        }
+    }
+    
+    function updateDashboardChart(ketetapan, pembayaran) {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+        const currentYear = new Date().getFullYear();
+        
+        // Data ketetapan per bulan
+        const ketetapanPerBulan = new Array(12).fill(0);
+        ketetapan.forEach(k => {
+            if (k.TanggalKetetapan) {
+                const date = new Date(k.TanggalKetetapan);
+                if (date.getFullYear() === currentYear) {
+                    ketetapanPerBulan[date.getMonth()]++;
+                }
+            }
+        });
+        
+        // Data pembayaran per bulan
+        const pembayaranPerBulan = new Array(12).fill(0);
+        pembayaran.forEach(p => {
+            if (p.TanggalBayar) {
+                const date = new Date(p.TanggalBayar);
+                if (date.getFullYear() === currentYear) {
+                    pembayaranPerBulan[date.getMonth()]++;
+                }
+            }
+        });
+        
+        const ctx = document.getElementById('dashboardChart').getContext('2d');
+        
+        // Destroy existing chart if it exists
+        if (window.dashboardChartInstance) {
+            window.dashboardChartInstance.destroy();
+        }
+        
+        window.dashboardChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [
+                    {
+                        label: 'Ketetapan',
+                        data: ketetapanPerBulan,
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Pembayaran',
+                        data: pembayaranPerBulan,
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+    
+    // Load dashboard data when page loads
+    document.addEventListener('DOMContentLoaded', loadDashboardData);
+    </script>
     <div class="watermark-footer">MADE BY REYNOLDS</div>
 </body>
 </html>
