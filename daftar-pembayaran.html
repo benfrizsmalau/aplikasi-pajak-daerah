@@ -8,42 +8,64 @@
 </head>
 <body id="page-daftar-pembayaran">
 
-    <header class="main-header">
-        <h1>Aplikasi Pajak Daerah</h1>
+    <!-- Sidebar Menu -->
+    <div class="sidebar-menu">
+        <div class="instansi-header">
+            <div class="instansi-logo">
+                <img src="images/logo.png" alt="Logo" width="50" height="50">
+            </div>
+            <div class="instansi-text">
+                <div class="instansi-title">DINAS PENDAPATAN DAERAH</div>
+                <div class="instansi-sub">KABUPATEN SIMPATDA</div>
+                <div class="instansi-sub2">Sistem Informasi Pajak Daerah</div>
+            </div>
+        </div>
+        
         <nav>
-            <a href="index.html">Dasbor</a>
-            <a href="tambah-data.html">Tambah Data WP</a>
-            <a href="lihat-data.html">Lihat Data WP</a>
-            <a href="tambah-ketetapan.html">Buat Ketetapan</a>
-            <a href="setoran-pajak.html">Setoran Pajak</a>
-            <a href="daftar-pembayaran.html" class="active">Daftar Pembayaran</a>
-            <a href="daftar-fiskal.html">Daftar Fiskal</a>
+            <a href="index.html">📊 Dasbor</a>
+            <a href="tambah-data.html">➕ Tambah Data WP</a>
+            <a href="lihat-data.html">👥 Lihat Data WP</a>
+            <a href="tambah-ketetapan.html">📋 Buat Ketetapan</a>
+            <a href="setoran-pajak.html">💰 Setoran Pajak</a>
+            <a href="daftar-pembayaran.html" class="active">📋 Daftar Pembayaran</a>
+            <a href="daftar-fiskal.html">📄 Daftar Fiskal</a>
         </nav>
-    </header>
+        
+        <div class="watermark-footer">
+            MADE BY REYNOLDS
+        </div>
+    </div>
 
-    <main class="container">
-        <h2>Daftar Pembayaran</h2>
-        <p>Halaman ini akan menampilkan daftar pembayaran yang sudah dilakukan dan fitur cetak bukti bayar (SSPD/SSRD).</p>
-        <table id="tabelPembayaran" class="data-table">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>ID Pembayaran</th>
-                    <th>ID Ketetapan</th>
-                    <th>NPWPD</th>
-                    <th>Tanggal Bayar</th>
-                    <th>Jumlah Bayar</th>
-                    <th>Metode</th>
-                    <th>Operator</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td colspan="10">Memuat data...</td></tr>
-            </tbody>
-        </table>
-    </main>
+    <!-- Main Content -->
+    <div class="main-content">
+        <main class="container">
+            <h2 style="margin-bottom: 16px; color: #2c3e50; font-size: 1.4rem;">📋 Daftar Pembayaran</h2>
+            <p style="margin-bottom: 24px; color: #666; font-size: 0.95rem;">Halaman ini menampilkan daftar pembayaran yang sudah dilakukan dan fitur cetak bukti bayar (SSPD/SSRD).</p>
+            
+            <div style="overflow-x:auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(60,60,120,0.08);">
+                <table id="tabelPembayaran" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>ID Pembayaran</th>
+                            <th>ID Ketetapan</th>
+                            <th>NPWPD</th>
+                            <th>Tanggal Bayar</th>
+                            <th>Jumlah Bayar</th>
+                            <th>Metode</th>
+                            <th>Operator</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="10" style="text-align: center; padding: 40px; color: #666;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    
     <div id="printArea" style="display:none;"></div>
     <script>
     const apiUrl = '/.netlify/functions/api';
@@ -62,7 +84,7 @@
             masterPajakDataGlobal = data.masterPajak || [];
             ketetapanDataGlobal = data.ketetapan || [];
             if (pembayaran.length === 0) {
-                tabelBody.innerHTML = '<tr><td colspan="10">Belum ada data pembayaran.</td></tr>';
+                tabelBody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 40px; color: #666;">Belum ada data pembayaran.</td></tr>';
                 return;
             }
             tabelBody.innerHTML = '';
@@ -79,14 +101,14 @@
                     <td>${row.Operator || ''}</td>
                     <td>${row.StatusPembayaran || ''}</td>
                     <td>
-                        <button class="btn-print" data-id="${row.ID_Pembayaran}">Print Bukti Bayar</button>
-                        <button class="btn-delete" data-id="${row.ID_Pembayaran}" style="background:#dc3545;color:#fff;margin-left:5px;">Delete</button>
+                        <button class="btn-print" data-id="${row.ID_Pembayaran}" style="background: #1976d2; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">🖨️ Print</button>
+                        <button class="btn-delete" data-id="${row.ID_Pembayaran}" style="background: #dc3545; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-left: 5px;">🗑️ Delete</button>
                     </td>
                 `;
                 tabelBody.appendChild(tr);
             });
         } catch (err) {
-            tabelBody.innerHTML = '<tr><td colspan="10">Gagal memuat data pembayaran.</td></tr>';
+            tabelBody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 40px; color: #666;">Gagal memuat data pembayaran.</td></tr>';
         }
 
         // Event print & delete

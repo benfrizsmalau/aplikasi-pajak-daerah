@@ -8,71 +8,103 @@
 </head>
 <body id="page-setoran-pajak">
 
-    <header class="main-header">
-        <h1>Aplikasi Pajak Daerah</h1>
+    <!-- Sidebar Menu -->
+    <div class="sidebar-menu">
+        <div class="instansi-header">
+            <div class="instansi-logo">
+                <img src="images/logo.png" alt="Logo" width="50" height="50">
+            </div>
+            <div class="instansi-text">
+                <div class="instansi-title">DINAS PENDAPATAN DAERAH</div>
+                <div class="instansi-sub">KABUPATEN SIMPATDA</div>
+                <div class="instansi-sub2">Sistem Informasi Pajak Daerah</div>
+            </div>
+        </div>
+        
         <nav>
-            <a href="index.html">Dasbor</a>
-            <a href="tambah-data.html">Tambah Data WP</a>
-            <a href="lihat-data.html">Lihat Data WP</a>
-            <a href="tambah-ketetapan.html">Buat Ketetapan</a>
-            <a href="setoran-pajak.html" class="active">Setoran Pajak</a>
-            <a href="daftar-pembayaran.html">Daftar Pembayaran</a>
-            <a href="daftar-fiskal.html">Daftar Fiskal</a>
+            <a href="index.html">📊 Dasbor</a>
+            <a href="tambah-data.html">➕ Tambah Data WP</a>
+            <a href="lihat-data.html">👥 Lihat Data WP</a>
+            <a href="tambah-ketetapan.html">📋 Buat Ketetapan</a>
+            <a href="setoran-pajak.html" class="active">💰 Setoran Pajak</a>
+            <a href="daftar-pembayaran.html">📋 Daftar Pembayaran</a>
+            <a href="daftar-fiskal.html">📄 Daftar Fiskal</a>
         </nav>
-    </header>
+        
+        <div class="watermark-footer">
+            MADE BY REYNOLDS
+        </div>
+    </div>
 
-    <main class="container">
-        <h2>Form Setoran Pajak</h2>
-        <p>Halaman ini akan digunakan untuk mencatat setoran pajak secara otomatis berdasarkan ketetapan yang sudah ada.</p>
-        <form id="formSetoranPajak">
-            <div class="form-group">
-                <label for="npwpdSelect">Pilih NPWPD</label>
-                <select id="npwpdSelect" required>
-                    <option value="">-- Pilih NPWPD --</option>
-                </select>
+    <!-- Main Content -->
+    <div class="main-content">
+        <main class="container">
+            <div class="wp-form-card">
+                <h2 class="form-title">💰 Form Setoran Pajak</h2>
+                <p style="margin-bottom: 20px; color: #666; font-size: 0.95rem;">Halaman ini digunakan untuk mencatat setoran pajak secara otomatis berdasarkan ketetapan yang sudah ada.</p>
+                
+                <form id="formSetoranPajak">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="npwpdSelect">Pilih NPWPD</label>
+                            <select id="npwpdSelect" required>
+                                <option value="">-- Pilih NPWPD --</option>
+                            </select>
+                            <div class="form-helper">Pilih NPWPD yang akan melakukan pembayaran</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ketetapanSelect">Pilih Ketetapan</label>
+                            <select id="ketetapanSelect" required disabled>
+                                <option value="">-- Pilih Ketetapan --</option>
+                            </select>
+                            <div class="form-helper">Ketetapan yang belum lunas akan muncul otomatis</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Usaha</label>
+                            <input type="text" id="namaUsaha" readonly>
+                            <div class="form-helper">Nama usaha akan terisi otomatis</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Masa Pajak</label>
+                            <input type="text" id="masaPajak" readonly>
+                            <div class="form-helper">Masa pajak dari ketetapan yang dipilih</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Jumlah Tagihan</label>
+                            <input type="text" id="jumlahTagihan" readonly>
+                            <div class="form-helper">Total tagihan yang harus dibayar</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tanggalBayar">Tanggal Bayar</label>
+                            <input type="date" id="tanggalBayar" required>
+                            <div class="form-helper">Tanggal pembayaran dilakukan</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="jumlahBayar">Jumlah Bayar</label>
+                            <input type="number" id="jumlahBayar" required min="0">
+                            <div class="form-helper">Jumlah yang dibayarkan (tanpa koma/titik)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="metodeBayar">Metode Bayar</label>
+                            <select id="metodeBayar" required>
+                                <option value="">-- Pilih Metode --</option>
+                                <option value="Tunai">Tunai</option>
+                                <option value="Transfer">Transfer</option>
+                            </select>
+                            <div class="form-helper">Cara pembayaran yang digunakan</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="operator">Operator</label>
+                            <input type="text" id="operator" required placeholder="Nama Operator">
+                            <div class="form-helper">Nama petugas yang mencatat pembayaran</div>
+                        </div>
+                    </div>
+                    <button type="submit" id="submitSetoranButton">💰 Simpan Setoran</button>
+                    <div id="statusSetoran"></div>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="ketetapanSelect">Pilih Ketetapan (Belum Lunas)</label>
-                <select id="ketetapanSelect" required disabled>
-                    <option value="">-- Pilih Ketetapan --</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Nama Usaha</label>
-                <input type="text" id="namaUsaha" readonly>
-            </div>
-            <div class="form-group">
-                <label>Masa Pajak</label>
-                <input type="text" id="masaPajak" readonly>
-            </div>
-            <div class="form-group">
-                <label>Jumlah Tagihan</label>
-                <input type="text" id="jumlahTagihan" readonly>
-            </div>
-            <div class="form-group">
-                <label for="tanggalBayar">Tanggal Bayar</label>
-                <input type="date" id="tanggalBayar" required>
-            </div>
-            <div class="form-group">
-                <label for="jumlahBayar">Jumlah Bayar</label>
-                <input type="number" id="jumlahBayar" required min="0">
-            </div>
-            <div class="form-group">
-                <label for="metodeBayar">Metode Bayar</label>
-                <select id="metodeBayar" required>
-                    <option value="">-- Pilih Metode --</option>
-                    <option value="Tunai">Tunai</option>
-                    <option value="Transfer">Transfer</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="operator">Operator</label>
-                <input type="text" id="operator" required placeholder="Nama Operator">
-            </div>
-            <button type="submit">Simpan Setoran</button>
-            <div id="statusSetoran"></div>
-        </form>
-    </main>
+        </main>
+    </div>
     
     <script>
     // Konfigurasi API URL Netlify
