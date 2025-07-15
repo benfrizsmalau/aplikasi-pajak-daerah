@@ -170,7 +170,7 @@ async function initDetailPage() {
         const item = dataWajibPajakGlobal.find(wp => wp.NPWPD == npwpd);
         if (!item) throw new Error(`Data untuk NPWPD ${npwpd} tidak ditemukan.`);
 
-        aksiContent.innerHTML = `<a href="tambah-ketetapan.html?npwpd=${npwpd}">Buat Ketetapan Baru</a>`;
+        aksiContent.innerHTML = `<a href="tambah-ketetapan.html?npwpd=${npwpd}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 12px 24px; background: #1976d2; color: white; border-radius: 8px; font-weight: 500; transition: background 0.3s;"><span>📋</span>Buat Ketetapan Baru</a>`;
         displayDetailData(item);
         displayPhotos(item);
         const riwayatKetetapan = dataKetetapanGlobal.filter(k => k.NPWPD == npwpd);
