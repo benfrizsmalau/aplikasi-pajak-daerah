@@ -158,6 +158,9 @@
             deleteFiskal(npwpd);
         }
     }
+    // Daftarkan ke global scope
+    window.handleCetakFiskal = handleCetakFiskal;
+    window.handleDeleteFiskal = handleDeleteFiskal;
 
     function printFiskal(npwpd, wp) {
         // Generate nomor urut (misal: random 6 digit, bisa diganti dengan logika lain)

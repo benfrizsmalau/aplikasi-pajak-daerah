@@ -143,6 +143,9 @@
             deletePembayaran(idPembayaran);
         }
     }
+    // Daftarkan ke global scope
+    window.handlePrintPembayaran = handlePrintPembayaran;
+    window.handleDeletePembayaran = handleDeletePembayaran;
 
     function printBuktiBayar(data) {
         // Tentukan jenis dokumen
