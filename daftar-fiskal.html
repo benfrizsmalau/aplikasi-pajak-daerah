@@ -210,8 +210,18 @@
         `;
         // Tampilkan hanya di window baru, tidak di halaman utama
         const win = window.open('', '', 'width=900,height=1200');
-        win.document.write('<html><head><title>Dokumen Fiskal</title><style>@media print {.btn-cetak-print{display:none!important;}}</style></head><body>' + html + '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script>window.onload=function(){new QRCode(document.getElementById(\'qrcode\'),{text: \'' + qrLink + '\',width:80,height:80});}</script></body></html>');
+        win.document.write('<html><head><title>Dokumen Fiskal</title><style>@media print {.btn-cetak-print{display:none!important;}}</style><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script></head><body>' + html + '</body></html>');
         win.document.close();
+        // Generate QR code setelah dokumen siap
+        win.onload = function() {
+            if (win.QRCode && win.document.getElementById('qrcode')) {
+                new win.QRCode(win.document.getElementById('qrcode'), {
+                    text: qrLink,
+                    width: 80,
+                    height: 80
+                });
+            }
+        };
     }
 
     async function deleteFiskal(npwpd) {
