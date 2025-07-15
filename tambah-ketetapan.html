@@ -8,75 +8,102 @@
 </head>
 <body id="page-tambah-ketetapan">
 
-    <!-- Sidebar Menu -->
-    <div class="sidebar-menu">
-        <div class="instansi-header">
-            <div class="instansi-logo">
-                <img src="images/logo.png" alt="Logo" width="50" height="50">
-            </div>
-            <div class="instansi-text">
-                <div class="instansi-title">DINAS PENDAPATAN DAERAH</div>
-                <div class="instansi-sub">KABUPATEN SIMPATDA</div>
-                <div class="instansi-sub2">Sistem Informasi Pajak Daerah</div>
+    <!-- Header Institusi -->
+    <header class="institutional-header">
+        <div class="header-content">
+            <img src="images/logo.png" alt="Logo" class="logo">
+            <div class="header-text">
+                <h1>DINAS PENDAPATAN DAERAH</h1>
+                <h2>PEMERINTAH KABUPATEN BANJAR</h2>
+                <p>Jl. Pangeran Hidayatullah No.1, Martapura, Kab. Banjar, Kalimantan Selatan 70614</p>
             </div>
         </div>
-        
-        <nav>
-            <a href="index.html">📊 Dasbor</a>
-            <a href="tambah-data.html">➕ Tambah Data WP</a>
-            <a href="lihat-data.html">👥 Lihat Data WP</a>
-            <a href="tambah-ketetapan.html" class="active">📋 Buat Ketetapan</a>
-            <a href="setoran-pajak.html">💰 Setoran Pajak</a>
-            <a href="daftar-pembayaran.html">📋 Daftar Pembayaran</a>
-            <a href="daftar-fiskal.html">📄 Daftar Fiskal</a>
-        </nav>
-        
-        <div class="watermark-footer">
-            MADE BY REYNOLDS
-        </div>
-    </div>
+    </header>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <main class="container">
-            <div class="wp-form-card">
-                <h2 class="form-title">📋 Buat Ketetapan Pajak/Retribusi Baru</h2>
+    <div class="app-container">
+        <!-- Sidebar Menu -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="tambah-data.html" class="nav-item">
+                    <span class="nav-icon">➕</span>
+                    <span class="nav-text">Tambah Data WP</span>
+                </a>
+                <a href="lihat-data.html" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Lihat Data WP</span>
+                </a>
+                <a href="tambah-ketetapan.html" class="nav-item active">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">Buat Ketetapan</span>
+                </a>
+                <a href="setoran-pajak.html" class="nav-item">
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-text">Setoran Pajak</span>
+                </a>
+                <a href="daftar-pembayaran.html" class="nav-item">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Daftar Pembayaran</span>
+                </a>
+                <a href="daftar-fiskal.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Daftar Fiskal</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <h2>📋 Buat Ketetapan Pajak/Retribusi Baru</h2>
+                <p>Formulir untuk membuat ketetapan pajak atau retribusi baru bagi wajib pajak</p>
+            </div>
+
+            <div class="content-card">
                 <form id="ketetapanForm">
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="ketetapanNpwpd">NPWPD</label>
+                            <label for="ketetapanNpwpd">NPWPD <span class="required">*</span></label>
                             <input type="text" id="ketetapanNpwpd" required placeholder="Masukkan NPWPD">
-                            <div class="form-helper">Format: 12.345.678.9-123.000</div>
+                            <small class="helper-text">Nomor Pokok Wajib Pajak Daerah yang sudah terdaftar</small>
                         </div>
                         <div class="form-group">
-                            <label for="ketetapanLayanan">Jenis Pajak/Retribusi</label>
+                            <label for="ketetapanLayanan">Jenis Pajak/Retribusi <span class="required">*</span></label>
                             <select id="ketetapanLayanan" required>
                                 <option value="">-- Pilih Jenis Pajak --</option>
                             </select>
-                            <div class="form-helper">Pilih jenis pajak yang akan dikenakan</div>
+                            <small class="helper-text">Pilih jenis pajak atau retribusi yang akan dikenakan</small>
                         </div>
                         <div class="form-group">
-                            <label for="ketetapanMasaPajak">Masa Pajak</label>
+                            <label for="ketetapanMasaPajak">Masa Pajak <span class="required">*</span></label>
                             <input type="text" id="ketetapanMasaPajak" required placeholder="Contoh: Juli 2025">
-                            <div class="form-helper">Periode pajak yang dikenakan</div>
+                            <small class="helper-text">Periode masa pajak yang dikenakan ketetapan</small>
                         </div>
                         <div class="form-group">
-                            <label for="ketetapanJumlahPokok">Jumlah Pokok (Rp)</label>
+                            <label for="ketetapanJumlahPokok">Jumlah Pokok (Rp) <span class="required">*</span></label>
                             <input type="number" id="ketetapanJumlahPokok" required placeholder="Hanya angka">
-                            <div class="form-helper">Jumlah pokok pajak tanpa koma atau titik</div>
+                            <small class="helper-text">Jumlah pokok pajak yang harus dibayar</small>
                         </div>
                         <div class="form-group full-width">
                             <label for="tglTunggakan">Tanggal Mulai Tunggakan</label>
                             <input type="date" id="tglTunggakan">
-                            <div class="form-helper">Isi hanya jika ada tunggakan dari masa lalu (opsional)</div>
+                            <small class="helper-text">Isi hanya jika ada tunggakan dari masa lalu</small>
                         </div>
                         <div class="form-group full-width">
                             <label for="catatan">Catatan</label>
                             <input type="text" id="catatan" placeholder="Keterangan tambahan...">
-                            <div class="form-helper">Catatan atau keterangan tambahan (opsional)</div>
+                            <small class="helper-text">Catatan atau keterangan tambahan untuk ketetapan ini</small>
                         </div>
                     </div>
-                    <button type="submit" id="submitKetetapanButton">📋 Buat Ketetapan</button>
+                    <div class="form-actions">
+                        <button type="submit" id="submitKetetapanButton" class="btn-primary">
+                            <span class="btn-icon">📋</span>
+                            Buat Ketetapan
+                        </button>
+                    </div>
                     <div id="status"></div>
                 </form>
             </div>
