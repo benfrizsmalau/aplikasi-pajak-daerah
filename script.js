@@ -701,3 +701,134 @@ function formatRupiah(angka) {
         minimumFractionDigits: 0 
     }).format(angka);
 }
+
+// Fungsi standar untuk tabel yang bisa digunakan di seluruh aplikasi
+function createStandardTable(tableId, data, config) {
+    const tableHead = document.querySelector(`#${tableId} thead`);
+    const tableBody = document.querySelector(`#${tableId} tbody`);
+    
+    if (!tableHead || !tableBody) return;
+    
+    tableHead.innerHTML = '';
+    tableBody.innerHTML = '';
+    
+    if (data.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="${config.columns.length + 1}" style="text-align: center; padding: 40px; color: #666;">${config.emptyMessage || 'Tidak ada data ditemukan.'}</td></tr>`;
+        return;
+    }
+    
+    // Buat header
+    const headerRow = document.createElement('tr');
+    config.columns.forEach(column => {
+        const th = document.createElement('th');
+        th.textContent = column.label;
+        headerRow.appendChild(th);
+    });
+    
+    // Tambah kolom aksi jika ada
+    if (config.actions) {
+        const actionTh = document.createElement('th');
+        actionTh.textContent = 'Aksi';
+        headerRow.appendChild(actionTh);
+    }
+    
+    tableHead.appendChild(headerRow);
+    
+    // Buat baris data
+    data.forEach((rowData, index) => {
+        const row = document.createElement('tr');
+        
+        config.columns.forEach(column => {
+            const cell = document.createElement('td');
+            let cellData = rowData[column.key];
+            
+            // Format data berdasarkan tipe
+            if (column.type === 'rupiah') {
+                cellData = formatRupiah(cellData);
+            } else if (column.type === 'date') {
+                cellData = cellData ? new Date(cellData).toLocaleDateString('id-ID') : '-';
+            } else if (column.type === 'link') {
+                cellData = `<a href="${column.linkUrl}${rowData[column.linkKey]}" style="color: #1976d2; text-decoration: none;">${cellData}</a>`;
+            } else if (column.type === 'status') {
+                const statusColor = column.statusColors[cellData] || '#666';
+                cellData = `<span style="color: ${statusColor}; font-weight: bold;">${cellData}</span>`;
+            } else if (column.type === 'photo') {
+                cellData = cellData && cellData.startsWith('http') ? 
+                    `<a href="${cellData}" target="_blank">Lihat Foto</a>` : 
+                    (cellData || '');
+            }
+            
+            if (column.type === 'link' || column.type === 'status' || column.type === 'photo') {
+                cell.innerHTML = cellData;
+            } else {
+                cell.textContent = cellData || '';
+            }
+            
+            row.appendChild(cell);
+        });
+        
+        // Tambah kolom aksi jika ada
+        if (config.actions) {
+            const actionCell = document.createElement('td');
+            let actionButtons = '';
+            
+            config.actions.forEach(action => {
+                const buttonClass = action.class || 'btn-aksi';
+                const buttonStyle = action.style || '';
+                const icon = action.icon || '';
+                
+                if (action.type === 'print') {
+                    actionButtons += `<button onclick="${action.onClick}('${rowData[action.key]}')" class="${buttonClass}" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-right: 4px;">${icon} Print</button>`;
+                } else if (action.type === 'edit') {
+                    actionButtons += `<button onclick="${action.onClick}('${rowData[action.key]}')" class="${buttonClass} btn-edit" style="margin-right: 4px;">${icon} Edit</button>`;
+                } else if (action.type === 'delete') {
+                    actionButtons += `<button onclick="${action.onClick}('${rowData[action.key]}')" class="${buttonClass} btn-hapus">${icon} Hapus</button>`;
+                } else if (action.type === 'custom') {
+                    actionButtons += `<button onclick="${action.onClick}('${rowData[action.key]}')" class="${buttonClass}" style="${buttonStyle}">${icon} ${action.label}</button>`;
+                }
+            });
+            
+            actionCell.innerHTML = actionButtons;
+            row.appendChild(actionCell);
+        }
+        
+        tableBody.appendChild(row);
+    });
+}
+
+// Fungsi untuk membuat search dan filter standar
+function setupStandardSearchFilter(searchInputId, filterSelects, data, displayFunction) {
+    const searchInput = document.getElementById(searchInputId);
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            performStandardSearch(data, displayFunction);
+        });
+    }
+    
+    filterSelects.forEach(filterConfig => {
+        const filterSelect = document.getElementById(filterConfig.id);
+        if (filterSelect) {
+            filterSelect.addEventListener('change', () => {
+                performStandardSearch(data, displayFunction);
+            });
+        }
+    });
+}
+
+function performStandardSearch(data, displayFunction) {
+    const searchInput = document.querySelector('input[id*="search"]');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    
+    let filteredData = data;
+    
+    if (searchTerm) {
+        filteredData = data.filter(item => {
+            return Object.values(item).some(value => 
+                value && value.toString().toLowerCase().includes(searchTerm)
+            );
+        });
+    }
+    
+    displayFunction(filteredData);
+}

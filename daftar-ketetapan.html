@@ -38,34 +38,32 @@
             </div>
 
             <!-- Filter dan Pencarian -->
-            <div class="content-card">
-                <div class="search-filter-section">
-                    <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="Cari NPWPD, nama usaha, atau ID ketetapan...">
-                        <button type="button" id="searchButton" class="btn-primary">
-                            <span class="btn-icon">🔍</span>
-                            Cari
-                        </button>
-                    </div>
-                    <div class="filter-options">
-                        <select id="filterStatus" class="filter-select">
-                            <option value="">Semua Status</option>
-                            <option value="Belum Lunas">Belum Lunas</option>
-                            <option value="Lunas">Lunas</option>
-                        </select>
-                        <select id="filterJenisPajak" class="filter-select">
-                            <option value="">Semua Jenis Pajak</option>
-                        </select>
-                        <button type="button" id="resetFilter" class="btn-secondary">
-                            <span class="btn-icon">🔄</span>
-                            Reset Filter
-                        </button>
-                    </div>
+            <div class="standard-search-filter">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Cari NPWPD, nama usaha, atau ID ketetapan...">
+                    <button type="button" id="searchButton" class="btn-primary">
+                        <span class="btn-icon">🔍</span>
+                        Cari
+                    </button>
+                </div>
+                <div class="filter-options">
+                    <select id="filterStatus" class="filter-select">
+                        <option value="">Semua Status</option>
+                        <option value="Belum Lunas">Belum Lunas</option>
+                        <option value="Lunas">Lunas</option>
+                    </select>
+                    <select id="filterJenisPajak" class="filter-select">
+                        <option value="">Semua Jenis Pajak</option>
+                    </select>
+                    <button type="button" id="resetFilter" class="btn-secondary">
+                        <span class="btn-icon">🔄</span>
+                        Reset Filter
+                    </button>
                 </div>
             </div>
 
             <!-- Tabel Ketetapan -->
-            <div class="content-card">
+            <div class="standard-table-container">
                 <div class="table-header">
                     <h3>📊 Data Ketetapan</h3>
                     <div class="table-info">
@@ -73,8 +71,8 @@
                     </div>
                 </div>
                 
-                <div style="overflow-x:auto;">
-                    <table id="ketetapanTable" class="data-table">
+                <div class="table-content">
+                    <table id="ketetapanTable" class="standard-table">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -92,7 +90,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td colspan="12" style="text-align: center; padding: 40px; color: #666;">Memuat data...</td></tr>
+                            <tr><td colspan="12" class="table-loading">Memuat data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -187,51 +185,51 @@
     }
 
     function displayKetetapanData(data) {
-        const tbody = document.querySelector('#ketetapanTable tbody');
         const totalRecords = document.getElementById('totalRecords');
+        totalRecords.textContent = `Total: ${data.length} ketetapan`;
         
-        if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="12" style="text-align: center; padding: 40px; color: #666;">Tidak ada data ketetapan.</td></tr>';
-            totalRecords.textContent = 'Total: 0 ketetapan';
-            return;
-        }
+        // Konfigurasi tabel standar
+        const tableConfig = {
+            columns: [
+                { key: 'index', label: 'No', type: 'text' },
+                { key: 'ID_Ketetapan', label: 'ID Ketetapan', type: 'text' },
+                { key: 'NPWPD', label: 'NPWPD', type: 'link', linkUrl: 'detail.html?npwpd=', linkKey: 'NPWPD' },
+                { key: 'namaUsaha', label: 'Nama Usaha', type: 'text' },
+                { key: 'namaLayanan', label: 'Jenis Pajak', type: 'text' },
+                { key: 'MasaPajak', label: 'Masa Pajak', type: 'text' },
+                { key: 'JumlahPokok', label: 'Jumlah Pokok', type: 'rupiah' },
+                { key: 'Denda', label: 'Denda', type: 'rupiah' },
+                { key: 'TotalTagihan', label: 'Total Tagihan', type: 'rupiah' },
+                { key: 'status', label: 'Status', type: 'status', statusColors: { 'Lunas': 'green', 'Belum Lunas': 'red' } },
+                { key: 'TanggalKetetapan', label: 'Tanggal', type: 'date' }
+            ],
+            actions: [
+                { type: 'print', key: 'ID_Ketetapan', onClick: 'printKetetapan', icon: '🖨️' },
+                { type: 'edit', key: 'ID_Ketetapan', onClick: 'handleEditKetetapanClick', icon: '✏️' },
+                { type: 'delete', key: 'ID_Ketetapan', onClick: 'handleDeleteKetetapanClick', icon: '🗑️' }
+            ],
+            emptyMessage: 'Tidak ada data ketetapan.'
+        };
         
-        tbody.innerHTML = '';
-        data.forEach((item, index) => {
-            // Cari data WP
+        // Proses data untuk tabel
+        const processedData = data.map((item, index) => {
             const wp = wajibPajakDataGlobal.find(w => w.NPWPD === item.NPWPD) || {};
-            
-            // Cari nama layanan
             const master = masterPajakDataGlobal.find(m => m.KodeLayanan === item.KodeLayanan);
             const namaLayanan = master ? master.NamaLayanan : item.KodeLayanan || '-';
-            
-            // Cek status pembayaran
             const pembayaranKetetapan = pembayaranDataGlobal.filter(p => p.ID_Ketetapan === item.ID_Ketetapan);
             const status = pembayaranKetetapan.some(p => p.StatusPembayaran === 'Sukses') ? 'Lunas' : 'Belum Lunas';
             
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${item.ID_Ketetapan || '-'}</td>
-                <td><a href="detail.html?npwpd=${item.NPWPD}" style="color: #1976d2; text-decoration: none;">${item.NPWPD || '-'}</a></td>
-                <td>${wp['Nama Usaha'] || '-'}</td>
-                <td>${namaLayanan}</td>
-                <td>${item.MasaPajak || '-'}</td>
-                <td>${formatRupiah(item.JumlahPokok)}</td>
-                <td>${formatRupiah(item.Denda)}</td>
-                <td>${formatRupiah(item.TotalTagihan)}</td>
-                <td><span style="color: ${status === 'Lunas' ? 'green' : 'red'}; font-weight: bold;">${status}</span></td>
-                <td>${item.TanggalKetetapan ? new Date(item.TanggalKetetapan).toLocaleDateString('id-ID') : '-'}</td>
-                <td>
-                    <button onclick="printKetetapan('${item.ID_Ketetapan}')" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">🖨️ Print</button>
-                    <button onclick="handleEditKetetapanClick('${item.ID_Ketetapan}')" style="background: #1976d2; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-left: 4px;">✏️ Edit</button>
-                    <button onclick="handleDeleteKetetapanClick('${item.ID_Ketetapan}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-left: 4px;">🗑️ Hapus</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
+            return {
+                ...item,
+                index: index + 1,
+                namaUsaha: wp['Nama Usaha'] || '-',
+                namaLayanan: namaLayanan,
+                status: status
+            };
         });
         
-        totalRecords.textContent = `Total: ${data.length} ketetapan`;
+        // Gunakan fungsi standar tabel
+        createStandardTable('ketetapanTable', processedData, tableConfig);
     }
 
     function setupEventListeners() {

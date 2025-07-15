@@ -1246,3 +1246,183 @@ th {
     align-items: flex-start;
   }
 }
+
+/* Standar Tabel untuk Seluruh Aplikasi */
+.standard-table-container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(60,60,120,0.08);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.standard-table-container .table-header {
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.standard-table-container .table-header h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.2rem;
+}
+
+.standard-table-container .table-info {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.standard-table-container .table-content {
+    overflow-x: auto;
+}
+
+.standard-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.standard-table thead th {
+    background: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.standard-table tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.standard-table tbody tr:nth-child(odd) {
+    background-color: #f8f9fa;
+}
+
+.standard-table tbody tr:hover {
+    background-color: #e3f2fd;
+}
+
+.standard-table tbody tr:hover td {
+    color: #1976d2;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+    .standard-table-container .table-header {
+        padding: 15px;
+    }
+    
+    .standard-table {
+        min-width: 600px;
+    }
+    
+    .standard-table thead th,
+    .standard-table tbody td {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Search dan Filter Standar */
+.standard-search-filter {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(60,60,120,0.08);
+    margin-bottom: 24px;
+}
+
+.standard-search-filter .search-box {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.standard-search-filter .search-box input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.standard-search-filter .search-box input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+.standard-search-filter .filter-options {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.standard-search-filter .filter-select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    min-width: 150px;
+}
+
+.standard-search-filter .filter-select:focus {
+    outline: none;
+    border-color: #1976d2;
+}
+
+/* Button standar untuk tabel */
+.btn-aksi {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-right: 4px;
+    transition: all 0.2s ease;
+}
+
+.btn-aksi:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.btn-edit {
+    background-color: #1976d2;
+}
+
+.btn-hapus {
+    background-color: #dc3545;
+}
+
+.btn-print {
+    background-color: #28a745;
+}
+
+.btn-view {
+    background-color: #6c757d;
+}
+
+/* Loading state untuk tabel */
+.table-loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-style: italic;
+}
+
+.table-empty {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
