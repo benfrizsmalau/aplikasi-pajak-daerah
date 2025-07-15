@@ -165,24 +165,24 @@
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
         const currentYear = new Date().getFullYear();
         
-        // Data ketetapan per bulan
-        const ketetapanPerBulan = new Array(12).fill(0);
+        // Data nilai ketetapan per bulan (dalam rupiah)
+        const nilaiKetetapanPerBulan = new Array(12).fill(0);
         ketetapan.forEach(k => {
             if (k.TanggalKetetapan) {
                 const date = new Date(k.TanggalKetetapan);
                 if (date.getFullYear() === currentYear) {
-                    ketetapanPerBulan[date.getMonth()]++;
+                    nilaiKetetapanPerBulan[date.getMonth()] += parseFloat(k.TotalTagihan) || 0;
                 }
             }
         });
         
-        // Data pembayaran per bulan
-        const pembayaranPerBulan = new Array(12).fill(0);
+        // Data nilai pembayaran per bulan (dalam rupiah)
+        const nilaiPembayaranPerBulan = new Array(12).fill(0);
         pembayaran.forEach(p => {
-            if (p.TanggalBayar) {
+            if (p.TanggalBayar && p.StatusPembayaran === 'Sukses') {
                 const date = new Date(p.TanggalBayar);
                 if (date.getFullYear() === currentYear) {
-                    pembayaranPerBulan[date.getMonth()]++;
+                    nilaiPembayaranPerBulan[date.getMonth()] += parseFloat(p.JumlahBayar) || 0;
                 }
             }
         });
@@ -200,15 +200,15 @@
                 labels: months,
                 datasets: [
                     {
-                        label: 'Ketetapan',
-                        data: ketetapanPerBulan,
+                        label: 'Nilai Ketetapan (Rp)',
+                        data: nilaiKetetapanPerBulan,
                         borderColor: '#4CAF50',
                         backgroundColor: 'rgba(76, 175, 80, 0.1)',
                         tension: 0.4
                     },
                     {
-                        label: 'Pembayaran',
-                        data: pembayaranPerBulan,
+                        label: 'Nilai Pembayaran (Rp)',
+                        data: nilaiPembayaranPerBulan,
                         borderColor: '#2196F3',
                         backgroundColor: 'rgba(33, 150, 243, 0.1)',
                         tension: 0.4
@@ -220,11 +220,24 @@
                 plugins: {
                     legend: {
                         position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                return context.dataset.label + ': Rp ' + value.toLocaleString('id-ID');
+                            }
+                        }
                     }
                 },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp ' + value.toLocaleString('id-ID');
+                            }
+                        }
                     }
                 }
             }
