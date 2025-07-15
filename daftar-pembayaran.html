@@ -32,29 +32,35 @@
 
     <div class="main-content">
         <main class="container">
-            <h2 style="margin-bottom: 16px; color: #2c3e50; font-size: 1.4rem;">📋 Daftar Pembayaran</h2>
-            <p style="margin-bottom: 24px; color: #666; font-size: 0.95rem;">Halaman ini menampilkan daftar pembayaran yang sudah dilakukan dan fitur cetak bukti bayar (SSPD/SSRD).</p>
-            
-            <div style="overflow-x:auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(60,60,120,0.08);">
-                <table id="tabelPembayaran" class="data-table">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>ID Pembayaran</th>
-                            <th>ID Ketetapan</th>
-                            <th>NPWPD</th>
-                            <th>Tanggal Bayar</th>
-                            <th>Jumlah Bayar</th>
-                            <th>Metode</th>
-                            <th>Operator</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td colspan="10" style="text-align: center; padding: 40px; color: #666;">Memuat data...</td></tr>
-                    </tbody>
-                </table>
+            <!-- TABEL PEMBAYARAN -->
+            <div class="standard-table-container">
+                <div class="table-header">
+                    <h3>📊 Daftar Pembayaran</h3>
+                    <div class="table-info">
+                        <span id="totalRecords">Total: 0 pembayaran</span>
+                    </div>
+                </div>
+                <div class="table-content">
+                    <table id="tabelPembayaran" class="standard-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>ID Pembayaran</th>
+                                <th>ID Ketetapan</th>
+                                <th>NPWPD</th>
+                                <th>Tanggal Bayar</th>
+                                <th>Jumlah Bayar</th>
+                                <th>Metode</th>
+                                <th>Operator</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="10" class="table-loading">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </main>
     </div>
@@ -76,32 +82,9 @@
             wajibPajakDataGlobal = data.wajibPajak || [];
             masterPajakDataGlobal = data.masterPajak || [];
             ketetapanDataGlobal = data.ketetapan || [];
-            if (pembayaran.length === 0) {
-                tabelBody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 40px; color: #666;">Belum ada data pembayaran.</td></tr>';
-                return;
-            }
-            tabelBody.innerHTML = '';
-            pembayaran.forEach((row, idx) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${idx + 1}</td>
-                    <td>${row.ID_Pembayaran || ''}</td>
-                    <td>${row.ID_Ketetapan || ''}</td>
-                    <td>${row.NPWPD || ''}</td>
-                    <td>${row.TanggalBayar || ''}</td>
-                    <td>${row.JumlahBayar || ''}</td>
-                    <td>${row.MetodeBayar || ''}</td>
-                    <td>${row.Operator || ''}</td>
-                    <td>${row.StatusPembayaran || ''}</td>
-                    <td>
-                        <button class="btn-print" data-id="${row.ID_Pembayaran}" style="background: #1976d2; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">🖨️ Print</button>
-                        <button class="btn-delete" data-id="${row.ID_Pembayaran}" style="background: #dc3545; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-left: 5px;">🗑️ Delete</button>
-                    </td>
-                `;
-                tabelBody.appendChild(tr);
-            });
+            displayPembayaranTable(pembayaran);
         } catch (err) {
-            tabelBody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 40px; color: #666;">Gagal memuat data pembayaran.</td></tr>';
+            tabelBody.innerHTML = '<tr><td colspan="10" class="table-empty">Gagal memuat data pembayaran.</td></tr>';
         }
 
         // Event print & delete
@@ -121,6 +104,45 @@
             }
         });
     });
+
+    function displayPembayaranTable(data) {
+        const totalRecords = document.getElementById('totalRecords');
+        totalRecords.textContent = `Total: ${data.length} pembayaran`;
+        const tableConfig = {
+            columns: [
+                { key: 'index', label: 'No', type: 'text' },
+                { key: 'ID_Pembayaran', label: 'ID Pembayaran', type: 'text' },
+                { key: 'ID_Ketetapan', label: 'ID Ketetapan', type: 'text' },
+                { key: 'NPWPD', label: 'NPWPD', type: 'text' },
+                { key: 'TanggalBayar', label: 'Tanggal Bayar', type: 'date' },
+                { key: 'JumlahBayar', label: 'Jumlah Bayar', type: 'rupiah' },
+                { key: 'MetodeBayar', label: 'Metode', type: 'text' },
+                { key: 'Operator', label: 'Operator', type: 'text' },
+                { key: 'StatusPembayaran', label: 'Status', type: 'status', statusColors: { 'Sukses': 'green', 'Gagal': 'red' } }
+            ],
+            actions: [
+                { type: 'print', key: 'ID_Pembayaran', onClick: 'handlePrintPembayaran', icon: '🖨️' },
+                { type: 'delete', key: 'ID_Pembayaran', onClick: 'handleDeletePembayaran', icon: '🗑️' }
+            ],
+            emptyMessage: 'Belum ada data pembayaran.'
+        };
+        const processedData = data.map((row, idx) => ({
+            ...row,
+            index: idx + 1
+        }));
+        createStandardTable('tabelPembayaran', processedData, tableConfig);
+    }
+
+    // Handler untuk tombol print dan delete standar
+    function handlePrintPembayaran(idPembayaran) {
+        const pembayaran = pembayaranDataGlobal.find(p => p.ID_Pembayaran === idPembayaran);
+        if (pembayaran) printBuktiBayar(pembayaran);
+    }
+    function handleDeletePembayaran(idPembayaran) {
+        if (confirm('Yakin ingin menghapus pembayaran ini?')) {
+            deletePembayaran(idPembayaran);
+        }
+    }
 
     function printBuktiBayar(data) {
         // Tentukan jenis dokumen

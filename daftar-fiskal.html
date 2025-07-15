@@ -32,25 +32,31 @@
 
     <div class="main-content">
         <main class="container">
-            <h2 style="margin-bottom: 16px; color: #2c3e50; font-size: 1.4rem;">📄 Daftar Dokumen Fiskal</h2>
-            <p style="margin-bottom: 24px; color: #666; font-size: 0.95rem;">Halaman ini menampilkan daftar NPWPD yang sudah memenuhi syarat untuk cetak dokumen fiskal (sudah lunas Pajak Reklame dan Retribusi Persampahan).</p>
-            
-            <div style="overflow-x:auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(60,60,120,0.08);">
-                <table id="tabelFiskal" class="data-table">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>NPWPD</th>
-                            <th>Nama Usaha</th>
-                            <th>Pajak Reklame</th>
-                            <th>Retribusi Persampahan</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td colspan="6" style="text-align: center; padding: 40px; color: #666;">Memuat data...</td></tr>
-                    </tbody>
-                </table>
+            <!-- TABEL FISKAL -->
+            <div class="standard-table-container">
+                <div class="table-header">
+                    <h3>📄 Daftar Dokumen Fiskal</h3>
+                    <div class="table-info">
+                        <span id="totalRecords">Total: 0 fiskal</span>
+                    </div>
+                </div>
+                <div class="table-content">
+                    <table id="tabelFiskal" class="standard-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>NPWPD</th>
+                                <th>Nama Usaha</th>
+                                <th>Pajak Reklame</th>
+                                <th>Retribusi Persampahan</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="6" class="table-loading">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </main>
     </div>
@@ -94,28 +100,9 @@
                     hasil.push({ npwpd, namaUsaha: wp['Nama Usaha'] || '-', namaPemilik: wp['Nama Pemilik'] || '-', alamat: wp['Alamat'] || '-' });
                 }
             });
-            if (hasil.length === 0) {
-                tabelBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #666;">Belum ada NPWPD yang memenuhi syarat cetak dokumen fiskal.</td></tr>';
-                return;
-            }
-            tabelBody.innerHTML = '';
-            hasil.forEach((row, idx) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${idx + 1}</td>
-                    <td>${row.npwpd}</td>
-                    <td>${row.namaUsaha}</td>
-                    <td style="color:green;font-weight:bold;">✅ Lunas</td>
-                    <td style="color:green;font-weight:bold;">✅ Lunas</td>
-                    <td>
-                        <button class="btn-cetak-fiskal" data-npwpd="${row.npwpd}" style="background: #1976d2; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">📄 Cetak Fiskal</button>
-                        <button class="btn-delete-fiskal" data-npwpd="${row.npwpd}" style="background: #dc3545; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-left: 5px;">🗑️ Delete</button>
-                    </td>
-                `;
-                tabelBody.appendChild(tr);
-            });
+            displayFiskalTable(hasil);
         } catch (err) {
-            tabelBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #666;">Gagal memuat data.</td></tr>';
+            tabelBody.innerHTML = '<tr><td colspan="6" class="table-empty">Gagal memuat data.</td></tr>';
         }
 
         // Event cetak fiskal
@@ -134,6 +121,43 @@
             }
         });
     });
+
+    function displayFiskalTable(data) {
+        const totalRecords = document.getElementById('totalRecords');
+        totalRecords.textContent = `Total: ${data.length} fiskal`;
+        const tableConfig = {
+            columns: [
+                { key: 'index', label: 'No', type: 'text' },
+                { key: 'npwpd', label: 'NPWPD', type: 'text' },
+                { key: 'namaUsaha', label: 'Nama Usaha', type: 'text' },
+                { key: 'reklame', label: 'Pajak Reklame', type: 'status', statusColors: { 'Lunas': 'green' } },
+                { key: 'sampah', label: 'Retribusi Persampahan', type: 'status', statusColors: { 'Lunas': 'green' } }
+            ],
+            actions: [
+                { type: 'custom', key: 'npwpd', onClick: 'handleCetakFiskal', icon: '📄', label: 'Cetak Fiskal', class: 'btn-cetak-fiskal' },
+                { type: 'delete', key: 'npwpd', onClick: 'handleDeleteFiskal', icon: '🗑️' }
+            ],
+            emptyMessage: 'Belum ada NPWPD yang memenuhi syarat cetak dokumen fiskal.'
+        };
+        const processedData = data.map((row, idx) => ({
+            ...row,
+            index: idx + 1,
+            reklame: 'Lunas',
+            sampah: 'Lunas'
+        }));
+        createStandardTable('tabelFiskal', processedData, tableConfig);
+    }
+
+    // Handler tombol aksi
+    function handleCetakFiskal(npwpd) {
+        const wp = wajibPajakDataGlobal.find(wp => wp.NPWPD === npwpd) || {};
+        printFiskal(npwpd, wp);
+    }
+    function handleDeleteFiskal(npwpd) {
+        if (confirm('Yakin ingin menghapus data fiskal untuk NPWPD ' + npwpd + '?')) {
+            deleteFiskal(npwpd);
+        }
+    }
 
     function printFiskal(npwpd, wp) {
         // Generate nomor urut (misal: random 6 digit, bisa diganti dengan logika lain)
