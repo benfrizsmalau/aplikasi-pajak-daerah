@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Dokumen Fiskal - Aplikasi Pajak Daerah</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body id="page-daftar-fiskal">
 
@@ -144,9 +145,12 @@
         // Tanggal berlaku 1 tahun sejak tanggal cetak
         const tglCetak = tgl.toLocaleDateString('id-ID');
         const tglBerlaku = new Date(tgl.getFullYear()+1, tgl.getMonth(), tgl.getDate()).toLocaleDateString('id-ID');
+        // Link verifikasi QR
+        const baseUrl = window.location.origin || 'https://simpatda.mamberamoraya.go.id';
+        const qrLink = `${baseUrl}/verifikasi-fiskal.html?no=${encodeURIComponent(nomorUrut)}&npwpd=${encodeURIComponent(npwpd)}`;
         // Template dokumen fiskal
         const html = `
-        <div style="font-family:Arial;max-width:800px;margin:auto;padding:24px;">
+        <div style="font-family:Arial;max-width:800px;margin:auto;padding:24px;position:relative;">
             <div style="display:flex;align-items:center;gap:16px;">
                 <img src="/images/logo.png" style="height:70px;">
                 <div style="flex:1;text-align:center;">
@@ -195,6 +199,10 @@
                     NIP. 197610202003121007
                 </div>
             </div>
+            <div id="qr-fiskal" style="position:absolute;right:24px;bottom:24px;text-align:center;">
+                <div id="qrcode"></div>
+                <div style="font-size:10px;color:#888;margin-top:4px;">Scan QR untuk verifikasi keaslian</div>
+            </div>
             <div style="text-align:center;margin-top:32px;">
                 <button class="btn-cetak-print" onclick="window.print()" style="padding:10px 24px;font-size:15px;cursor:pointer;">Cetak</button>
             </div>
@@ -202,7 +210,7 @@
         `;
         // Tampilkan hanya di window baru, tidak di halaman utama
         const win = window.open('', '', 'width=900,height=1200');
-        win.document.write('<html><head><title>Dokumen Fiskal</title><style>@media print {.btn-cetak-print{display:none!important;}}</style></head><body>' + html + '</body></html>');
+        win.document.write('<html><head><title>Dokumen Fiskal</title><style>@media print {.btn-cetak-print{display:none!important;}}</style></head><body>' + html + '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script>window.onload=function(){new QRCode(document.getElementById(\'qrcode\'),{text: \'' + qrLink + '\',width:80,height:80});}</script></body></html>');
         win.document.close();
     }
 
