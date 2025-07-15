@@ -147,26 +147,88 @@
     }
 
     function printFiskal(npwpd, wp) {
-        // Generate nomor urut (misal: random 6 digit, bisa diganti dengan logika lain)
         const nomorUrut = Math.floor(100000 + Math.random() * 900000).toString();
         const tgl = new Date();
         const bulanRomawi = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
         const nomorDok = `${nomorUrut}/FKL/BPPKAD/${bulanRomawi[tgl.getMonth()]}/${tgl.getFullYear()}`;
-        // Tanggal berlaku 1 tahun sejak tanggal cetak
         const tglCetak = tgl.toLocaleDateString('id-ID');
         const tglBerlaku = new Date(tgl.getFullYear()+1, tgl.getMonth(), tgl.getDate()).toLocaleDateString('id-ID');
-        // Link verifikasi QR
         const baseUrl = window.location.origin || 'https://simpatda.mamberamoraya.go.id';
         const qrLink = `${baseUrl}/verifikasi-fiskal.html?no=${encodeURIComponent(nomorUrut)}&npwpd=${encodeURIComponent(npwpd)}`;
-        // HTML konten fiskal (escape semua data)
-        const html = '<div style="font-family:Arial;max-width:800px;margin:auto;padding:24px;position:relative;"><div style="display:flex;align-items:center;gap:16px;"><img src="/images/logo.png" style="height:70px;"><div style="flex:1;text-align:center;"><div style="font-size:16px;font-weight:bold;">PEMERINTAH KABUPATEN MAMBERAMO RAYA</div><div style="font-size:14px;font-weight:bold;letter-spacing:-0.5px;">BADAN PENDAPATAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</div><div style="font-size:12px;">KOMPLEKS PERKANTORAN OTONOM, BURMESO DISTRIK MAMBERAMO TENGAH,<br>KABUPATEN MAMBERAMO RAYA, PROVINSI PAPUA</div></div></div><hr><div style="text-align:center;margin:16px 0 8px 0;"><div style="font-size:15px;font-weight:bold;">FISKAL PEMBAYARAN PAJAK DAN RETRIBUSI DAERAH</div><div style="font-size:14px;">NOMOR : <b>' + escapeHtml(nomorDok) + '</b></div></div><div style="margin:24px 0 16px 0;font-size:14px;">Atas Nama Bupati Kabupaten Mamberamo Raya menerangkan bahwa Wajib Pajak dibawah ini :</div><table style="width:100%;margin-bottom:8px;font-size:14px;"><tr><td style="width:160px;">Nama Pemilik</td><td>: ' + escapeHtml(wp['Nama Pemilik'] || '-') + '</td></tr><tr><td>Nama Usaha</td><td>: ' + escapeHtml(wp['Nama Usaha'] || '-') + '</td></tr><tr><td>Alamat</td><td>: ' + escapeHtml(wp['Alamat'] || '-') + '</td></tr><tr><td>NPWPD</td><td>: ' + escapeHtml(wp.NPWPD || '-') + '</td></tr></table><div style="margin:16px 0;font-size:14px;">TELAH MELAKSANAKAN KEWAJIBAN PEMBAYARAN PAJAK DAERAH DAN RETRIBUSI DAERAH DENGAN BAIK</div><div style="margin-bottom:16px;font-size:14px;">Surat Fiskal ini diberikan atas nama pemohon yang bersangkutan untuk keperluan<br>1. Mengurus Surat Izin Jasa Konstruksi<br>2. Surat Izin Usaha Perdagangan (SIUP)<br>3. Tanda Daftar Perusahaan (TDP)</div><div style="margin-bottom:16px;font-size:14px;">Surat ini berlaku sampai dengan tanggal <b>' + escapeHtml(tglBerlaku) + '</b> dan hanya berlaku untuk penggunaan di Kabupaten Mamberamo Raya.<br><br>Demikian surat Fiskal ini diberikan untuk dapat dipergunakan sebagaimana mestinya.</div><div style="display:flex;justify-content:space-between;font-size:14px;margin-top:32px;"><div></div><div style="text-align:center;">Dikeluarkan di : Burmeso<br>Pada Tanggal : ' + escapeHtml(tglCetak) + '<br><br>An. KEPALA BADAN PENDAPATAN<br>PENGELOLAAN KEUANGAN DAN ASET DAERAH<br><b>KEPALA BIDANG PENDAPATAN</b><br><br><br><br><b>HERMAN TARIBABA, SE</b><br>NIP. 197610202003121007</div></div><div id="qr-fiskal" style="position:absolute;right:24px;bottom:24px;text-align:center;"><div id="qrcode"></div><div style="font-size:10px;color:#888;margin-top:4px;">Scan QR untuk verifikasi keaslian</div></div><div style="text-align:center;margin-top:32px;"><button class="btn-cetak-print" onclick="window.print()" style="padding:10px 24px;font-size:15px;cursor:pointer;">Cetak</button></div></div>';
-        // Tampilkan hanya di window baru, tidak di halaman utama
         const win = window.open('', '', 'width=900,height=1200');
-        win.document.write('<html><head><title>Dokumen Fiskal</title><style>@media print {.btn-cetak-print{display:none!important;}}</style><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script></head><body><div id="container"></div></body></html>');
+        win.document.write('<html><head><title>Dokumen Fiskal</title><style>@media print {.btn-cetak-print{display:none!important;} #qr-fiskal{position:absolute;right:24px;bottom:24px;text-align:center;} }</style><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script></head><body><div id="container"></div></body></html>');
         win.document.close();
         win.onload = function() {
-            var container = win.document.getElementById('container');
-            if (container) container.innerHTML = html;
+            var d = win.document;
+            var c = d.getElementById('container');
+            c.style.fontFamily = 'Arial';
+            c.style.maxWidth = '800px';
+            c.style.margin = 'auto';
+            c.style.padding = '24px';
+            c.style.position = 'relative';
+            // Header
+            var header = d.createElement('div'); header.style.display = 'flex'; header.style.alignItems = 'center'; header.style.gap = '16px';
+            var logo = d.createElement('img'); logo.src = '/images/logo.png'; logo.style.height = '70px';
+            var headerText = d.createElement('div'); headerText.style.flex = '1'; headerText.style.textAlign = 'center';
+            var h1 = d.createElement('div'); h1.style.fontSize = '16px'; h1.style.fontWeight = 'bold'; h1.textContent = 'PEMERINTAH KABUPATEN MAMBERAMO RAYA';
+            var h2 = d.createElement('div'); h2.style.fontSize = '14px'; h2.style.fontWeight = 'bold'; h2.style.letterSpacing = '-0.5px'; h2.textContent = 'BADAN PENDAPATAN PENGELOLAAN KEUANGAN DAN ASET DAERAH';
+            var h3 = d.createElement('div'); h3.style.fontSize = '12px'; h3.innerHTML = 'KOMPLEKS PERKANTORAN OTONOM, BURMESO DISTRIK MAMBERAMO TENGAH,<br>KABUPATEN MAMBERAMO RAYA, PROVINSI PAPUA';
+            headerText.appendChild(h1); headerText.appendChild(h2); headerText.appendChild(h3);
+            header.appendChild(logo); header.appendChild(headerText);
+            c.appendChild(header);
+            c.appendChild(d.createElement('hr'));
+            // Judul
+            var judul = d.createElement('div'); judul.style.textAlign = 'center'; judul.style.margin = '16px 0 8px 0';
+            var j1 = d.createElement('div'); j1.style.fontSize = '15px'; j1.style.fontWeight = 'bold'; j1.textContent = 'FISKAL PEMBAYARAN PAJAK DAN RETRIBUSI DAERAH';
+            var j2 = d.createElement('div'); j2.style.fontSize = '14px'; j2.innerHTML = 'NOMOR : <b>' + nomorDok + '</b>';
+            judul.appendChild(j1); judul.appendChild(j2); c.appendChild(judul);
+            // Paragraf pengantar
+            var pPengantar = d.createElement('div'); pPengantar.style.margin = '24px 0 16px 0'; pPengantar.style.fontSize = '14px';
+            pPengantar.textContent = 'Atas Nama Bupati Kabupaten Mamberamo Raya menerangkan bahwa Wajib Pajak dibawah ini :';
+            c.appendChild(pPengantar);
+            // Tabel data WP
+            var tbl = d.createElement('table'); tbl.style.width = '100%'; tbl.style.marginBottom = '8px'; tbl.style.fontSize = '14px';
+            var rows = [
+                ['Nama Pemilik', wp['Nama Pemilik'] || '-'],
+                ['Nama Usaha', wp['Nama Usaha'] || '-'],
+                ['Alamat', wp['Alamat'] || '-'],
+                ['NPWPD', wp.NPWPD || '-']
+            ];
+            rows.forEach(function(r) {
+                var tr = d.createElement('tr');
+                var td1 = d.createElement('td'); td1.style.width = '160px'; td1.textContent = r[0];
+                var td2 = d.createElement('td'); td2.textContent = ': ' + r[1];
+                tr.appendChild(td1); tr.appendChild(td2); tbl.appendChild(tr);
+            });
+            c.appendChild(tbl);
+            // Paragraf status
+            var pStatus = d.createElement('div'); pStatus.style.margin = '16px 0'; pStatus.style.fontSize = '14px';
+            pStatus.textContent = 'TELAH MELAKSANAKAN KEWAJIBAN PEMBAYARAN PAJAK DAERAH DAN RETRIBUSI DAERAH DENGAN BAIK';
+            c.appendChild(pStatus);
+            // Paragraf keperluan
+            var pKeperluan = d.createElement('div'); pKeperluan.style.marginBottom = '16px'; pKeperluan.style.fontSize = '14px';
+            pKeperluan.innerHTML = 'Surat Fiskal ini diberikan atas nama pemohon yang bersangkutan untuk keperluan<br>1. Mengurus Surat Izin Jasa Konstruksi<br>2. Surat Izin Usaha Perdagangan (SIUP)<br>3. Tanda Daftar Perusahaan (TDP)';
+            c.appendChild(pKeperluan);
+            // Paragraf berlaku
+            var pBerlaku = d.createElement('div'); pBerlaku.style.marginBottom = '16px'; pBerlaku.style.fontSize = '14px';
+            pBerlaku.innerHTML = 'Surat ini berlaku sampai dengan tanggal <b>' + tglBerlaku + '</b> dan hanya berlaku untuk penggunaan di Kabupaten Mamberamo Raya.<br><br>Demikian surat Fiskal ini diberikan untuk dapat dipergunakan sebagaimana mestinya.';
+            c.appendChild(pBerlaku);
+            // Tanda tangan
+            var ttd = d.createElement('div'); ttd.style.display = 'flex'; ttd.style.justifyContent = 'space-between'; ttd.style.fontSize = '14px'; ttd.style.marginTop = '32px';
+            var ttdR = d.createElement('div'); ttdR.style.textAlign = 'center';
+            ttdR.innerHTML = 'Dikeluarkan di : Burmeso<br>Pada Tanggal : ' + tglCetak + '<br><br>An. KEPALA BADAN PENDAPATAN<br>PENGELOLAAN KEUANGAN DAN ASET DAERAH<br><b>KEPALA BIDANG PENDAPATAN</b><br><br><br><br><b>HERMAN TARIBABA, SE</b><br>NIP. 197610202003121007';
+            ttd.appendChild(d.createElement('div'));
+            ttd.appendChild(ttdR);
+            c.appendChild(ttd);
+            // QR code
+            var qrWrap = d.createElement('div'); qrWrap.id = 'qr-fiskal'; qrWrap.style.position = 'absolute'; qrWrap.style.right = '24px'; qrWrap.style.bottom = '24px'; qrWrap.style.textAlign = 'center';
+            var qrDiv = d.createElement('div'); qrDiv.id = 'qrcode'; qrWrap.appendChild(qrDiv);
+            var qrLabel = d.createElement('div'); qrLabel.style.fontSize = '10px'; qrLabel.style.color = '#888'; qrLabel.style.marginTop = '4px'; qrLabel.textContent = 'Scan QR untuk verifikasi keaslian';
+            qrWrap.appendChild(qrLabel); c.appendChild(qrWrap);
+            // Tombol cetak
+            var btn = d.createElement('button'); btn.className = 'btn-cetak-print'; btn.textContent = 'Cetak'; btn.style.padding = '10px 24px'; btn.style.fontSize = '15px'; btn.style.cursor = 'pointer'; btn.onclick = function() { win.print(); };
+            var btnWrap = d.createElement('div'); btnWrap.style.textAlign = 'center'; btnWrap.style.marginTop = '32px'; btnWrap.appendChild(btn); c.appendChild(btnWrap);
+            // QR code
             if (win.QRCode && win.document.getElementById('qrcode')) {
                 new win.QRCode(win.document.getElementById('qrcode'), {
                     text: qrLink,
