@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Ketetapan - Aplikasi Pajak Daerah</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="page-daftar-ketetapan">
+
+    <div class="instansi-header">
+        <img src="images/logo.png" alt="Logo" class="instansi-logo">
+        <div class="instansi-text">
+            <div class="instansi-title">APLIKASI SISTEM INFORMASI PENDAPATAN DAERAH</div>
+            <div class="instansi-sub">BIDANG PENDAPATAN DAERAH</div>
+            <div class="instansi-sub2">BADAN PENDAPATAN PENGELOLAAN KEUANGAN DAN ASET DAERAH KABUPATEN MAMBERAMO RAYA</div>
+        </div>
+    </div>
+
+    <div class="sidebar-menu">
+        <nav>
+            <a href="index.html">Dasbor</a>
+            <a href="tambah-data.html">Tambah Data WP</a>
+            <a href="lihat-data.html">Lihat Data WP</a>
+            <a href="tambah-ketetapan.html">Buat Ketetapan</a>
+            <a href="daftar-ketetapan.html" class="active">Daftar Ketetapan</a>
+            <a href="setoran-pajak.html">Setoran Pajak</a>
+            <a href="daftar-pembayaran.html">Daftar Pembayaran</a>
+            <a href="daftar-fiskal.html">Daftar Fiskal</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <main class="container">
+            <div class="content-header">
+                <h2>📋 Daftar Ketetapan Pajak/Retribusi</h2>
+                <p>Kelola dan lihat semua ketetapan pajak yang telah dibuat</p>
+            </div>
+
+            <!-- Filter dan Pencarian -->
+            <div class="content-card">
+                <div class="search-filter-section">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Cari NPWPD, nama usaha, atau ID ketetapan...">
+                        <button type="button" id="searchButton" class="btn-primary">
+                            <span class="btn-icon">🔍</span>
+                            Cari
+                        </button>
+                    </div>
+                    <div class="filter-options">
+                        <select id="filterStatus" class="filter-select">
+                            <option value="">Semua Status</option>
+                            <option value="Belum Lunas">Belum Lunas</option>
+                            <option value="Lunas">Lunas</option>
+                        </select>
+                        <select id="filterJenisPajak" class="filter-select">
+                            <option value="">Semua Jenis Pajak</option>
+                        </select>
+                        <button type="button" id="resetFilter" class="btn-secondary">
+                            <span class="btn-icon">🔄</span>
+                            Reset Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabel Ketetapan -->
+            <div class="content-card">
+                <div class="table-header">
+                    <h3>📊 Data Ketetapan</h3>
+                    <div class="table-info">
+                        <span id="totalRecords">Total: 0 ketetapan</span>
+                    </div>
+                </div>
+                
+                <div style="overflow-x:auto;">
+                    <table id="ketetapanTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>ID Ketetapan</th>
+                                <th>NPWPD</th>
+                                <th>Nama Usaha</th>
+                                <th>Jenis Pajak</th>
+                                <th>Masa Pajak</th>
+                                <th>Jumlah Pokok</th>
+                                <th>Denda</th>
+                                <th>Total Tagihan</th>
+                                <th>Status</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="12" style="text-align: center; padding: 40px; color: #666;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Edit Ketetapan -->
+    <div id="editKetetapanModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeKetetapanModal">&times;</span>
+            <h2>✏️ Edit Ketetapan Pajak</h2>
+            <form id="editKetetapanForm">
+                <input type="hidden" id="editKetetapanId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editKetetapanMasaPajak">Masa Pajak</label>
+                        <input type="text" id="editKetetapanMasaPajak" required>
+                        <small class="helper-text">Periode masa pajak yang dikenakan</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="editKetetapanJumlahPokok">Jumlah Pokok (Rp)</label>
+                        <input type="number" id="editKetetapanJumlahPokok" required>
+                        <small class="helper-text">Jumlah pokok pajak yang harus dibayar</small>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="editKetetapanCatatan">Catatan</label>
+                        <input type="text" id="editKetetapanCatatan">
+                        <small class="helper-text">Catatan atau keterangan tambahan</small>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" id="updateKetetapanButton" class="btn-primary">
+                        <span class="btn-icon">💾</span>
+                        Simpan Perubahan
+                    </button>
+                </div>
+                <p style="font-size: 0.9em; color: #666; margin-top: 1rem;">* Hanya Masa Pajak dan Jumlah Pokok yang bisa diubah. Denda akan dihitung ulang otomatis.</p>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+    // Script khusus untuk halaman daftar ketetapan
+    let ketetapanDataGlobal = [];
+    let wajibPajakDataGlobal = [];
+    let masterPajakDataGlobal = [];
+    let pembayaranDataGlobal = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadKetetapanData();
+        setupEventListeners();
+    });
+
+    async function loadKetetapanData() {
+        try {
+            const response = await fetch('/.netlify/functions/api');
+            const data = await response.json();
+            
+            ketetapanDataGlobal = data.ketetapan || [];
+            wajibPajakDataGlobal = data.wajibPajak || [];
+            masterPajakDataGlobal = data.masterPajak || [];
+            pembayaranDataGlobal = data.pembayaran || [];
+            
+            // Isi filter jenis pajak
+            populateJenisPajakFilter();
+            
+            // Tampilkan data
+            displayKetetapanData(ketetapanDataGlobal);
+            
+        } catch (error) {
+            console.error('Error loading data:', error);
+            document.querySelector('#ketetapanTable tbody').innerHTML = 
+                '<tr><td colspan="12" style="text-align: center; padding: 40px; color: #666;">Gagal memuat data.</td></tr>';
+        }
+    }
+
+    function populateJenisPajakFilter() {
+        const filterSelect = document.getElementById('filterJenisPajak');
+        const uniqueJenisPajak = [...new Set(ketetapanDataGlobal.map(k => {
+            const master = masterPajakDataGlobal.find(m => m.KodeLayanan === k.KodeLayanan);
+            return master ? master.NamaLayanan : k.KodeLayanan;
+        }))];
+        
+        uniqueJenisPajak.forEach(jenis => {
+            const option = document.createElement('option');
+            option.value = jenis;
+            option.textContent = jenis;
+            filterSelect.appendChild(option);
+        });
+    }
+
+    function displayKetetapanData(data) {
+        const tbody = document.querySelector('#ketetapanTable tbody');
+        const totalRecords = document.getElementById('totalRecords');
+        
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="12" style="text-align: center; padding: 40px; color: #666;">Tidak ada data ketetapan.</td></tr>';
+            totalRecords.textContent = 'Total: 0 ketetapan';
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        data.forEach((item, index) => {
+            // Cari data WP
+            const wp = wajibPajakDataGlobal.find(w => w.NPWPD === item.NPWPD) || {};
+            
+            // Cari nama layanan
+            const master = masterPajakDataGlobal.find(m => m.KodeLayanan === item.KodeLayanan);
+            const namaLayanan = master ? master.NamaLayanan : item.KodeLayanan || '-';
+            
+            // Cek status pembayaran
+            const pembayaranKetetapan = pembayaranDataGlobal.filter(p => p.ID_Ketetapan === item.ID_Ketetapan);
+            const status = pembayaranKetetapan.some(p => p.StatusPembayaran === 'Sukses') ? 'Lunas' : 'Belum Lunas';
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${item.ID_Ketetapan || '-'}</td>
+                <td><a href="detail.html?npwpd=${item.NPWPD}" style="color: #1976d2; text-decoration: none;">${item.NPWPD || '-'}</a></td>
+                <td>${wp['Nama Usaha'] || '-'}</td>
+                <td>${namaLayanan}</td>
+                <td>${item.MasaPajak || '-'}</td>
+                <td>${formatRupiah(item.JumlahPokok)}</td>
+                <td>${formatRupiah(item.Denda)}</td>
+                <td>${formatRupiah(item.TotalTagihan)}</td>
+                <td><span style="color: ${status === 'Lunas' ? 'green' : 'red'}; font-weight: bold;">${status}</span></td>
+                <td>${item.TanggalKetetapan ? new Date(item.TanggalKetetapan).toLocaleDateString('id-ID') : '-'}</td>
+                <td>
+                    <button onclick="printKetetapan('${item.ID_Ketetapan}')" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">🖨️ Print</button>
+                    <button onclick="handleEditKetetapanClick('${item.ID_Ketetapan}')" style="background: #1976d2; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-left: 4px;">✏️ Edit</button>
+                    <button onclick="handleDeleteKetetapanClick('${item.ID_Ketetapan}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-left: 4px;">🗑️ Hapus</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        totalRecords.textContent = `Total: ${data.length} ketetapan`;
+    }
+
+    function setupEventListeners() {
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+        
+        // Filter functionality
+        const filterStatus = document.getElementById('filterStatus');
+        const filterJenisPajak = document.getElementById('filterJenisPajak');
+        const resetFilter = document.getElementById('resetFilter');
+        
+        filterStatus.addEventListener('change', applyFilters);
+        filterJenisPajak.addEventListener('change', applyFilters);
+        resetFilter.addEventListener('click', resetAllFilters);
+    }
+
+    function performSearch() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        
+        const filteredData = ketetapanDataGlobal.filter(item => {
+            const wp = wajibPajakDataGlobal.find(w => w.NPWPD === item.NPWPD) || {};
+            const master = masterPajakDataGlobal.find(m => m.KodeLayanan === item.KodeLayanan);
+            const namaLayanan = master ? master.NamaLayanan : item.KodeLayanan || '';
+            
+            return (
+                item.ID_Ketetapan?.toLowerCase().includes(searchTerm) ||
+                item.NPWPD?.toLowerCase().includes(searchTerm) ||
+                wp['Nama Usaha']?.toLowerCase().includes(searchTerm) ||
+                namaLayanan.toLowerCase().includes(searchTerm)
+            );
+        });
+        
+        displayKetetapanData(filteredData);
+    }
+
+    function applyFilters() {
+        const statusFilter = document.getElementById('filterStatus').value;
+        const jenisFilter = document.getElementById('filterJenisPajak').value;
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        
+        let filteredData = ketetapanDataGlobal;
+        
+        // Apply search filter
+        if (searchTerm) {
+            filteredData = filteredData.filter(item => {
+                const wp = wajibPajakDataGlobal.find(w => w.NPWPD === item.NPWPD) || {};
+                const master = masterPajakDataGlobal.find(m => m.KodeLayanan === item.KodeLayanan);
+                const namaLayanan = master ? master.NamaLayanan : item.KodeLayanan || '';
+                
+                return (
+                    item.ID_Ketetapan?.toLowerCase().includes(searchTerm) ||
+                    item.NPWPD?.toLowerCase().includes(searchTerm) ||
+                    wp['Nama Usaha']?.toLowerCase().includes(searchTerm) ||
+                    namaLayanan.toLowerCase().includes(searchTerm)
+                );
+            });
+        }
+        
+        // Apply status filter
+        if (statusFilter) {
+            filteredData = filteredData.filter(item => {
+                const pembayaranKetetapan = pembayaranDataGlobal.filter(p => p.ID_Ketetapan === item.ID_Ketetapan);
+                const status = pembayaranKetetapan.some(p => p.StatusPembayaran === 'Sukses') ? 'Lunas' : 'Belum Lunas';
+                return status === statusFilter;
+            });
+        }
+        
+        // Apply jenis pajak filter
+        if (jenisFilter) {
+            filteredData = filteredData.filter(item => {
+                const master = masterPajakDataGlobal.find(m => m.KodeLayanan === item.KodeLayanan);
+                const namaLayanan = master ? master.NamaLayanan : item.KodeLayanan || '';
+                return namaLayanan === jenisFilter;
+            });
+        }
+        
+        displayKetetapanData(filteredData);
+    }
+
+    function resetAllFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('filterStatus').value = '';
+        document.getElementById('filterJenisPajak').value = '';
+        displayKetetapanData(ketetapanDataGlobal);
+    }
+
+    function printKetetapan(idKetetapan) {
+        window.open(`cetak-skpd.html?id=${idKetetapan}`, '_blank');
+    }
+
+    function formatRupiah(angka) {
+        if (!angka) return 'Rp 0';
+        return new Intl.NumberFormat('id-ID', { 
+            style: 'currency', 
+            currency: 'IDR', 
+            minimumFractionDigits: 0 
+        }).format(angka);
+    }
+    </script>
+    <div class="watermark-footer">MADE BY REYNOLDS</div>
+</body>
+</html> 
